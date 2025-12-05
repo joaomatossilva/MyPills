@@ -11,17 +11,17 @@ namespace MyPills.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<DateTime>(
+            migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "StockDate",
                 table: "Medicines",
-                type: "TEXT",
+                type: "datetimeoffset",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTimeOffset(1, 1, 1, 0, 0, 0, 0,  TimeSpan.Zero));
 
             migrationBuilder.AddColumn<int>(
                 name: "StockQuantity",
                 table: "Medicines",
-                type: "INTEGER",
+                type: "int",
                 nullable: false,
                 defaultValue: 0);
         }

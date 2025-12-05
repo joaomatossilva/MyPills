@@ -42,5 +42,5 @@ public class OverviewModel(ApplicationDbContext dbContext) : PageModel
 public record MedicineStock(Guid MedicineId, string Name, int AvailableQuantity)
 {
     [DisplayFormat(DataFormatString = "{0:d}")]
-    public DateTime EstimatedDate { get; set; }
+    public DateTimeOffset EstimatedDate { get; set; }
 };

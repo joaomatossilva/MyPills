@@ -16,6 +16,6 @@ public class Medicine
     public int BoxSize { get; set; } = 0;
     
     [DisplayFormat(DataFormatString = "{0:d}")]
-    public DateTime StockDate { get; set; }
+    public DateTimeOffset StockDate { get; set; }
     public int StockQuantity { get; set; }
 }

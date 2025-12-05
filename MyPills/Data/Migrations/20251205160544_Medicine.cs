@@ -15,9 +15,9 @@ namespace MyPills.Data.Migrations
                 name: "Medicines",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    BoxSize = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<Guid>(type: "nvarchar(128)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    BoxSize = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

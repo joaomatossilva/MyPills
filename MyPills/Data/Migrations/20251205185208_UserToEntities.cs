@@ -13,14 +13,14 @@ namespace MyPills.Data.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "UserId",
                 table: "StockEntries",
-                type: "TEXT",
+                type: "nvarchar(450)",
                 nullable: false,
                 defaultValue: "");
 
             migrationBuilder.AddColumn<string>(
                 name: "UserId",
                 table: "Medicines",
-                type: "TEXT",
+                type: "nvarchar(450)",
                 nullable: false,
                 defaultValue: "");
             
@@ -53,7 +53,7 @@ namespace MyPills.Data.Migrations
                 column: "UserId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
         }
 
         /// <inheritdoc />

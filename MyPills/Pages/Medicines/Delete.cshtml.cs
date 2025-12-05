@@ -28,7 +28,8 @@ namespace MyPills.Pages.Medicines
                 return NotFound();
             }
 
-            var medicine = await _context.Medicines.FirstOrDefaultAsync(m => m.Id == id);
+            var userId = User.GetUserId();
+            var medicine = await _context.Medicines.FirstOrDefaultAsync(m => m.Id == id &&  m.UserId == userId);
 
             if (medicine is not null)
             {
@@ -47,8 +48,9 @@ namespace MyPills.Pages.Medicines
                 return NotFound();
             }
 
+            var userId = User.GetUserId();
             var medicine = await _context.Medicines.FindAsync(id);
-            if (medicine != null)
+            if (medicine != null &&  medicine.UserId == userId)
             {
                 Medicine = medicine;
                 _context.Medicines.Remove(Medicine);

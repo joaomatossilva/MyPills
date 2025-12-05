@@ -7,26 +7,13 @@ namespace MyPills.Pages;
 
 public class IndexModel(ApplicationDbContext dbContext) : PageModel
 {
-    public IList<MedicineStock> Medicines { get;set; } = default!;
-
-    public async Task OnGetAsync()
+    public IActionResult OnGetAsync()
     {
-        var today = DateTime.Today;
-        var medicines = await dbContext.Medicines.ToListAsync();
-
-        Medicines = medicines.Select(x =>
+        if (User?.Identity?.IsAuthenticated == true)
         {
-            if (x.StockQuantity > 0 && x.StockDate != default)
-            {
-                var dateTime = x.StockDate;
-                var days = (dateTime - today).Days;
-                var estimated = dateTime.AddDays(x.StockQuantity);
-                return new MedicineStock(x.Id, x.Name, x.StockQuantity - days, estimated);
-            }
-
-            return new MedicineStock(x.Id, x.Name, 0, today);
-        }).ToList();
+            return RedirectToPage("/Overview");
+        }
+        
+        return Page();
     }
 }
-
-public record MedicineStock(Guid MedicineId, string Name, int AvailableQuantity, DateTime EstimatedDate);

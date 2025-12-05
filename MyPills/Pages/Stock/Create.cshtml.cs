@@ -37,8 +37,10 @@ namespace MyPills.Pages.Stock
                 return Page();
             }
 
+            var userId =  User.GetUserId();
             var stockEntry = new StockEntry
             {
+                UserId = userId,
                 Date = DateTimeOffset.UtcNow,
                 MedicineId = StockEntry.MedicineId,
                 Quantity = StockEntry.Quantity!.Value,
@@ -46,7 +48,7 @@ namespace MyPills.Pages.Stock
             };
             _context.StockEntries.Add(stockEntry);
             
-            var medicine = _context.Medicines.FirstOrDefault(m => m.Id == stockEntry.MedicineId);
+            var medicine = _context.Medicines.FirstOrDefault(m => m.Id == stockEntry.MedicineId && m.UserId == userId);
             if (medicine == null)
             {
                 return Page();

@@ -12,7 +12,19 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages(opt =>
+{
+    opt.Conventions.AuthorizePage("/Overview");
+    opt.Conventions.AuthorizeFolder("/Stock");
+    opt.Conventions.AuthorizeFolder("/Medicines");
+});
+
+builder.Services.AddAuthentication()
+    .AddGoogle(opt =>
+    {
+        opt.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+        opt.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    });
 
 var app = builder.Build();
 

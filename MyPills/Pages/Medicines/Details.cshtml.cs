@@ -28,7 +28,8 @@ namespace MyPills.Pages.Medicines
                 return NotFound();
             }
 
-            var medicine = await _context.Medicines.FirstOrDefaultAsync(m => m.Id == id);
+            var userId = User.GetUserId();
+            var medicine = await _context.Medicines.FirstOrDefaultAsync(m => m.Id == id && m.UserId == userId);
 
             if (medicine is not null)
             {
@@ -36,7 +37,7 @@ namespace MyPills.Pages.Medicines
                 
                 StockEntry = await _context.StockEntries
                     .Include(s => s.Medicine)
-                    .Where(x => x.MedicineId == id)
+                    .Where(x => x.MedicineId == id && x.UserId == userId)
                     .ToListAsync();
 
                 return Page();

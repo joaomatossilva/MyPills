@@ -1,12 +1,32 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using MyPills.Data;
 
 namespace MyPills.Pages;
 
-public class IndexModel : PageModel
+public class IndexModel(ApplicationDbContext dbContext) : PageModel
 {
-    public void OnGet()
-    {
+    public IList<MedicineStock> Medicines { get;set; } = default!;
 
+    public async Task OnGetAsync()
+    {
+        var today = DateTime.Today;
+        var medicines = await dbContext.Medicines.ToListAsync();
+
+        Medicines = medicines.Select(x =>
+        {
+            if (x.StockQuantity > 0 && x.StockDate != default)
+            {
+                var dateTime = x.StockDate;
+                var days = (dateTime - today).Days;
+                var estimated = dateTime.AddDays(x.StockQuantity);
+                return new MedicineStock(x.Id, x.Name, days, estimated);
+            }
+
+            return new MedicineStock(x.Id, x.Name, 0, today);
+        }).ToList();
     }
 }
+
+public record MedicineStock(Guid MedicineId, string Name, int AvailableQuantity, DateTime EstimatedDate);

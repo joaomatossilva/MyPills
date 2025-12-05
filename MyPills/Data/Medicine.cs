@@ -10,4 +10,7 @@ public class Medicine
     public string Name { get; set; } = string.Empty;
 
     public int BoxSize { get; set; } = 0;
+    
+    public DateTime StockDate { get; set; }
+    public int StockQuantity { get; set; }
 }

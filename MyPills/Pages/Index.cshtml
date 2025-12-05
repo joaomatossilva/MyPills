@@ -4,7 +4,41 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Medicines[0].Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Medicines[0].AvailableQuantity)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Medicines[0].EstimatedDate)
+        </th>
+        @*<th></th>*@
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Medicines) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AvailableQuantity)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EstimatedDate)
+            </td>
+        @*
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+            *@
+        </tr>
+    }
+    </tbody>
+</table>

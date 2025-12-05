@@ -16,7 +16,7 @@
         <th>
             @Html.DisplayNameFor(model => model.Medicines[0].EstimatedDate)
         </th>
-        @*<th></th>*@
+        <th></th>
     </tr>
     </thead>
     <tbody>
@@ -31,13 +31,12 @@
             <td>
                 @Html.DisplayFor(modelItem => item.EstimatedDate)
             </td>
-        @*
+        
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-page="./Stock/Create" asp-route-id="@item.MedicineId">Add Stock</a>
+
             </td>
-            *@
+            
         </tr>
     }
     </tbody>

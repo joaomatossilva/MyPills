@@ -23,6 +23,7 @@
 
     <ItemGroup>
       <Folder Include="Pages\Medicines\" />
+      <Folder Include="Pages\Stock\" />
     </ItemGroup>
 
 </Project>

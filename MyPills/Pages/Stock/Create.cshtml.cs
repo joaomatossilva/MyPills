@@ -1,0 +1,71 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using MyPills.Data;
+
+namespace MyPills.Pages.Stock
+{
+    public class CreateModel : PageModel
+    {
+        private readonly MyPills.Data.ApplicationDbContext _context;
+
+        public CreateModel(MyPills.Data.ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public IActionResult OnGet()
+        {
+            ViewData["MedicineId"] = new SelectList(_context.Medicines, "Id", "Name");
+            return Page();
+        }
+
+        [BindProperty]
+        public StockEntryModel StockEntry { get; set; } = default!;
+
+        // For more information, see https://aka.ms/RazorPagesCRUD.
+        public async Task<IActionResult> OnPostAsync()
+        {
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
+            var stockEntry = new StockEntry
+            {
+                Date = DateTimeOffset.UtcNow,
+                MedicineId = StockEntry.MedicineId,
+                Quantity = StockEntry.Quantity!.Value,
+                Type = StockEntry.Type
+            };
+            _context.StockEntries.Add(stockEntry);
+            
+            var medicine = _context.Medicines.FirstOrDefault(m => m.Id == stockEntry.MedicineId);
+            if (medicine == null)
+            {
+                return Page();
+            }
+
+            medicine.StockDate = DateTime.Today;
+            if (StockEntry.Type == StockEntryType.Manual)
+            {
+                medicine.StockQuantity += stockEntry.Quantity;
+            }
+            else
+            {
+                medicine.StockQuantity += stockEntry.Quantity * medicine.BoxSize;
+            }
+            
+            await _context.SaveChangesAsync();
+
+            return RedirectToPage("./Index");
+        }
+    }
+    
+    public record StockEntryModel(Guid MedicineId, StockEntryType Type, [Required]int?  Quantity);
+}

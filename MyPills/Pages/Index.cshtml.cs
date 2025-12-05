@@ -21,7 +21,7 @@ public class IndexModel(ApplicationDbContext dbContext) : PageModel
                 var dateTime = x.StockDate;
                 var days = (dateTime - today).Days;
                 var estimated = dateTime.AddDays(x.StockQuantity);
-                return new MedicineStock(x.Id, x.Name, days, estimated);
+                return new MedicineStock(x.Id, x.Name, x.StockQuantity - days, estimated);
             }
 
             return new MedicineStock(x.Id, x.Name, 0, today);

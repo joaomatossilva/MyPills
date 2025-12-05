@@ -32,7 +32,7 @@
 @foreach (var item in Model.StockEntry) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Medicine.Id)
+                <a asp-page="/Medicines/Details" asp-route-id="@item.Medicine.Id">@Html.DisplayFor(modelItem => item.Medicine.Name)</a>
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Date)

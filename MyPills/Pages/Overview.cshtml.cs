@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -24,12 +25,22 @@ public class OverviewModel(ApplicationDbContext dbContext) : PageModel
                 var dateTime = x.StockDate;
                 var days = (dateTime - today).Days;
                 var estimated = dateTime.AddDays(x.StockQuantity);
-                return new MedicineStock(x.Id, x.Name, x.StockQuantity - days, estimated);
+                return new MedicineStock(x.Id, x.Name, x.StockQuantity - days)
+                {
+                    EstimatedDate = estimated
+                };
             }
 
-            return new MedicineStock(x.Id, x.Name, 0, today);
+            return new MedicineStock(x.Id, x.Name, 0)
+            {
+                EstimatedDate = today
+            };
         }).ToList();
     }
 }
 
-public record MedicineStock(Guid MedicineId, string Name, int AvailableQuantity, DateTime EstimatedDate);
+public record MedicineStock(Guid MedicineId, string Name, int AvailableQuantity)
+{
+    [DisplayFormat(DataFormatString = "{0:d}")]
+    public DateTime EstimatedDate { get; set; }
+};

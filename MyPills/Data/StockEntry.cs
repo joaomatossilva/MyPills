@@ -11,6 +11,7 @@ public class StockEntry
     [Required]
     public string UserId { get; set; }
     public virtual IdentityUser User { get; set; }
+    [DisplayFormat(DataFormatString = "{0:d}")]
     public DateTimeOffset Date { get; set; }
     public int Quantity { get; set; }
     public StockEntryType Type { get; set; }

@@ -54,7 +54,6 @@
             <th>
                 @Html.DisplayNameFor(model => model.StockEntry[0].Type)
             </th>
-            <th></th>
         </tr>
         </thead>
         <tbody>
@@ -68,9 +67,6 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Type)
-                </td>
-                <td>
-                    <a asp-page="./Details" asp-route-id="@item.Id">Details</a>
                 </td>
             </tr>
         }

@@ -19,6 +19,7 @@ namespace MyPills.Pages.Medicines
         }
 
         public Medicine Medicine { get; set; } = default!;
+        public IList<StockEntry> StockEntry { get;set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(Guid? id)
         {
@@ -32,6 +33,11 @@ namespace MyPills.Pages.Medicines
             if (medicine is not null)
             {
                 Medicine = medicine;
+                
+                StockEntry = await _context.StockEntries
+                    .Include(s => s.Medicine)
+                    .Where(x => x.MedicineId == id)
+                    .ToListAsync();
 
                 return Page();
             }

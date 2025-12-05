@@ -1,0 +1,7 @@
+﻿services:
+  mypills:
+    image: mypills
+    build:
+      context: .
+      dockerfile: MyPills/Dockerfile
+

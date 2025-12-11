@@ -280,7 +280,7 @@ namespace MyPills.Data.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("BoxSize")
                         .HasColumnType("int");
@@ -311,13 +311,13 @@ namespace MyPills.Data.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("Date")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<Guid>("MedicineId")
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");

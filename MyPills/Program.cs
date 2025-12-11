@@ -17,6 +17,7 @@ builder.Services.AddRazorPages(opt =>
     opt.Conventions.AuthorizePage("/Overview");
     opt.Conventions.AuthorizeFolder("/Stock");
     opt.Conventions.AuthorizeFolder("/Medicines");
+    opt.Conventions.AuthorizeFolder("/Prescriptions");
 });
 
 builder.Services.AddAuthentication()

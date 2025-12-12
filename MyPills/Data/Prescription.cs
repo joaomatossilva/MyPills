@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +9,9 @@ public class Prescription
     public Guid Id { get; set; }
     public string UserId { get; set; }
     public virtual IdentityUser User { get; set; }
-    public DateTimeOffset Date { get; set; }
+    [DisplayFormat(DataFormatString = "{0:d}")]
+    public DateTime Date { get; set; }
+    [DisplayFormat(DataFormatString = "{0:d}")]
     public DateTime ExpiryDate { get; set; }
     
     public ICollection<PrescribedMedicine> Medicines { get; set; }

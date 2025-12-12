@@ -24,7 +24,7 @@ namespace MyPills.Pages.Prescriptions
         }
 
         [BindProperty]
-        public Prescription Prescription { get; set; } = default!;
+        public PrescriptionModel Prescription { get; set; } = default!;
 
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
@@ -34,10 +34,23 @@ namespace MyPills.Pages.Prescriptions
                 return Page();
             }
 
-            _context.Prescriptions.Add(Prescription);
+            var userId = User.GetUserId();
+            var prescription = new Prescription()
+            {
+                UserId = userId,
+                Date = Prescription.Date.ToDateTime(TimeOnly.MinValue),
+                ExpiryDate = Prescription.ExpiryDate.ToDateTime(TimeOnly.MinValue)
+            };
+            _context.Prescriptions.Add(prescription);
             await _context.SaveChangesAsync();
 
             return RedirectToPage("./Index");
         }
+    }
+
+    public class PrescriptionModel
+    {
+        public DateOnly Date { get; set; }
+        public DateOnly ExpiryDate { get; set; }
     }
 }

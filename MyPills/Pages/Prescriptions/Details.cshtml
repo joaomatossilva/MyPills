@@ -29,3 +29,45 @@
     <a asp-page="./Edit" asp-route-id="@Model.Prescription.Id">Edit</a> |
     <a asp-page="./Index">Back to List</a>
 </div>
+
+<h2>
+    Prescription Medicines
+</h2>
+<p>
+    <a asp-page="Add" asp-route-id="@Model.Prescription.Id">Add New</a>
+</p>
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Prescription.Medicines.First().Medicine)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Prescription.Medicines.First().Quantity)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Prescription.Medicines.First().ConsumedQuantity)
+        </th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Prescription.Medicines) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Medicine.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Quantity)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ConsumedQuantity)
+            </td>
+            <td>
+                <a asp-page="./EditMedicine" asp-route-id="@item.PrescriptionId" asp-route-mid="@item.MedicineId">Edit</a> |
+                <a asp-page="./DeleteMedicine" asp-route-id="@item.PrescriptionId" asp-route-mid="@item.MedicineId">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

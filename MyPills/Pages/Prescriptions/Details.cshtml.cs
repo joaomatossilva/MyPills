@@ -27,7 +27,10 @@ namespace MyPills.Pages.Prescriptions
                 return NotFound();
             }
 
-            var prescription = await _context.Prescriptions.FirstOrDefaultAsync(m => m.Id == id);
+            var prescription = await _context.Prescriptions
+                .Include(m => m.Medicines)
+                .ThenInclude(pm => pm.Medicine)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
             if (prescription is not null)
             {

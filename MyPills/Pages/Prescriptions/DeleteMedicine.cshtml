@@ -1,0 +1,47 @@
+@page
+@model MyPills.Pages.PM.DeleteMedicineModel
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>PrescribedMedicine</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PrescribedMedicine.Prescription)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PrescribedMedicine.Prescription.Id)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PrescribedMedicine.Medicine)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PrescribedMedicine.Medicine.Id)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PrescribedMedicine.Quantity)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PrescribedMedicine.Quantity)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PrescribedMedicine.ConsumedQuantity)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PrescribedMedicine.ConsumedQuantity)
+        </dd>
+    </dl>
+    
+    <form method="post">
+        <input type="hidden" asp-for="PrescribedMedicine.PrescriptionId" />
+        <input type="hidden" asp-for="PrescribedMedicine.MedicineId" />
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-page="./Details" asp-route-id="@Model.PrescribedMedicine.PrescriptionId">Back to List</a>
+    </form>
+</div>

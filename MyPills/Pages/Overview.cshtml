@@ -16,6 +16,9 @@
         <th>
             @Html.DisplayNameFor(model => model.Medicines[0].EstimatedDate)
         </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Medicines[0].BoxesInPrescription)
+        </th>
         <th></th>
     </tr>
     </thead>
@@ -30,6 +33,9 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.EstimatedDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BoxesInPrescription)
             </td>
         
             <td>

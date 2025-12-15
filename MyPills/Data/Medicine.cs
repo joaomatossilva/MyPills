@@ -18,4 +18,6 @@ public class Medicine
     [DisplayFormat(DataFormatString = "{0:d}")]
     public DateTimeOffset StockDate { get; set; }
     public int StockQuantity { get; set; }
+    
+    public ICollection<PrescribedMedicine> Prescriptions { get; set; }
 }

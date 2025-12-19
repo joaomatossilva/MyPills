@@ -69,7 +69,9 @@ namespace MyPills.Pages.Stock
             
             await _context.SaveChangesAsync();
 
-            return RedirectToPage("./Index");
+            return StockEntry.Type == StockEntryType.Manual
+                ? RedirectToPage("/Overview")
+                : RedirectToPage("./DeductPrescription", new { mId = StockEntry.MedicineId, boxes = stockEntry.Quantity });
         }
     }
     

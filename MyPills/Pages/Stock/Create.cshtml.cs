@@ -54,10 +54,11 @@ namespace MyPills.Pages.Stock
                 return Page();
             }
 
-            var previousDate =  stockEntry.Date;
-            medicine.StockDate = DateTime.Today;
-            var daysDiff = medicine.StockDate.Subtract(previousDate).Days;
-            medicine.StockQuantity = Math.Min(0, medicine.StockQuantity - daysDiff); //adjust the expected consumption
+            var today =  DateTime.Today;
+            var daysDiff = today.Subtract(medicine.StockDate.Date).Days;
+            
+            medicine.StockDate = today;
+            medicine.StockQuantity = Math.Max(0, medicine.StockQuantity - daysDiff); //adjust the expected consumption
             if (StockEntry.Type == StockEntryType.Manual)
             {
                 medicine.StockQuantity += stockEntry.Quantity;

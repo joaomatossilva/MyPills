@@ -31,7 +31,7 @@ public class OverviewModel(ApplicationDbContext dbContext) : PageModel
             if (x.StockQuantity > 0 && x.StockDate != default)
             {
                 var dateTime = x.StockDate;
-                var days = (dateTime - today).Days;
+                var days = (today - dateTime).Days;
                 var estimated = dateTime.AddDays(x.StockQuantity);
                 return new MedicineStock(x.Id, x.Name, x.StockQuantity - days, inPrescription)
                 {

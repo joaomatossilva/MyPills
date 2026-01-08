@@ -4,6 +4,51 @@
     ViewData["Title"] = "Home page";
 }
 
+
+<div class="container my-5">
+    <h2 class="mb-4">Overview</h2>
+    
+    <!-- Responsive grid: 1 card on mobile, 2 on tablet, 3 on desktop -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        
+        
+    @foreach (var item in Model.Medicines)
+    {
+        <!-- Medicine Card  -->
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">@Html.DisplayFor(modelItem => item.Name)</h5>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Remaining Pills
+                            <span class="badge bg-success rounded-pill">@Html.DisplayFor(modelItem => item.AvailableQuantity)</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Estimated Finish
+                            <span class="text-primary fw-semibold">@Html.DisplayFor(modelItem => item.EstimatedDate)</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Prescriptions
+                            <span class="badge bg-secondary rounded-pill">@Html.DisplayFor(modelItem => item.BoxesInPrescription)</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-white border-top-0 pb-3">
+                    <a asp-page="./Stock/Create" asp-route-id="@item.MedicineId" class="btn btn-outline-primary btn-sm w-100">+ Add Stock</a>
+                </div>
+            </div>
+        </div>
+    }
+    
+    </div>
+</div>
+
+
+
+@*
+
 <table class="table">
     <thead>
     <tr>
@@ -47,3 +92,4 @@
     }
     </tbody>
 </table>
+*@

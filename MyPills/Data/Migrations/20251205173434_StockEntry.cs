@@ -15,8 +15,8 @@ namespace MyPills.Data.Migrations
                 name: "StockEntries",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "nvarchar(128)", nullable: false),
-                    MedicineId = table.Column<Guid>(type: "nvarchar(128)", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MedicineId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Date = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false)

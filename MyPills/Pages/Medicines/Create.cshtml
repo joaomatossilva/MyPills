@@ -1,36 +1,30 @@
 @page
 @model MyPills.Pages.Medicines.CreateModel
 
-        @{
-        ViewData["Title"] = "Create";
-        }
-        
-        <h1>Create</h1>
-        
-    <h4>Medicine</h4>
-    <hr />
-    <div class="row">
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="container my-5">
+<h2 class="mb-4">Add new Medicine</h2>
+<div class="row">
     <div class="col-md-4">
-    <form method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Medicine.Name" class="control-label"></label>
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-floating mb-3">
                 <input asp-for="Medicine.Name" class="form-control" />
+                <label asp-for="Medicine.Name" class="form-label"></label>
                 <span asp-validation-for="Medicine.Name" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Medicine.BoxSize" class="control-label"></label>
+            <div class="form-floating mb-3">
                 <input asp-for="Medicine.BoxSize" class="form-control" />
+                <label asp-for="Medicine.BoxSize" class="form-label"></label>
                 <span asp-validation-for="Medicine.BoxSize" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+            <div class="">
+                <input type="submit" value="Create" class="w-100 btn btn-lg btn-primary" />
             </div>
         </form>
     </div>
 </div>
-
-<div>
-    <a asp-page="Index">Back to List</a>
 </div>
-

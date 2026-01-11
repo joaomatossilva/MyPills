@@ -2,41 +2,36 @@
 @model MyPills.Pages.Medicines.IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Medicines";
 }
 
-<h1>Index</h1>
+<div class="container my-5">
+    <h2 class="mb-4">Manage Medicines</h2>
 
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Medicine[0].Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Medicine[0].BoxSize)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.Medicine) {
+    <p>
+        <a asp-page="Create" class="btn btn-success"><i class="fa-solid fa-plus"></i> <span>Add New Medicine</span></a>
+    </p>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Medicine[0].Name)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+    @foreach (var item in Model.Medicine) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Name)
+                <a asp-page="./Details" asp-route-id="@item.Id">@Html.DisplayFor(modelItem => item.Name)</a>
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.BoxSize)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+            <td class="text-end">
+                <a asp-page="./Edit" asp-route-id="@item.Id"><i class="fa-regular fa-pen-to-square"></i></a>
+                <a asp-page="./Delete" asp-route-id="@item.Id" class="link-danger"><i class="fa-solid fa-xmark"></i></a>
             </td>
         </tr>
-}
-    </tbody>
-</table>
+    }
+        </tbody>
+    </table>
+</div>

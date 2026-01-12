@@ -1,6 +1,92 @@
 ﻿@page
 @model IndexModel
 @{
+    Layout = "";
     ViewData["Title"] = "Home page";
 }
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Pills | Never miss a refill</title>
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hero-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 100px 0;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            color: #0d6efd;
+        }
+        .app-mockup {
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="#">💊 My Pills</a>
+            <a class="btn btn-outline-primary btn-sm d-none d-md-block" asp-area="Identity" asp-page="/Account/Login">Sign In</a>
+        </div>
+    </nav>
+
+    <header class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-3">Your Home Pharmacy, <span class="text-primary">Organized.</span></h1>
+                    <p class="lead mb-4 text-muted">Stop guessing how many pills are left in the bottle. My Pills monitors your home stock and reminds you to renew prescriptions before they expire.</p>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                        <a type="button" class="btn btn-primary btn-lg px-4 me-md-2" asp-area="Identity" asp-page="/Account/Register">Get Started Free</a>
+                    </div>
+                </div>
+                <div class="col-lg-6 d-none d-lg-block">
+                    <div class="bg-primary text-white p-5 text-center app-mockup">
+                        <h2 class="h4">Live Inventory</h2>
+                        <hr>
+                        <p>Aspirin: 12 Units Left</p>
+                        <p>Vitamin D3: 5 Units Left (Refill Soon!)</p>
+                        <div class="badge bg-warning text-dark">1 Prescription Expiring Soon</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="py-5">
+        <div class="container py-5">
+            <div class="row g-4 text-center">
+                <div class="col-md-4">
+                    <div class="feature-icon mb-3">📦</div>
+                    <h3>Stock Tracking</h3>
+                    <p class="text-muted">Log your current bottle count and let our algorithm subtract doses automatically based on your schedule.</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-icon mb-3">📄</div>
+                    <h3>Prescription Vault</h3>
+                    <p class="text-muted">Store photos of your prescriptions. Get alerts when they are about to expire or run out of refills.</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-icon mb-3">🔔</div>
+                    <h3>Smart Alerts</h3>
+                    <p class="text-muted">Receive a notification when it's time to visit the pharmacy, not when you've already run out.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-4 text-center border-top">
+        <p class="text-muted small">&copy; 2026 My Pills. All rights reserved.</p>
+    </footer>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Pills | Never miss a refill</title>
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="layout-fixed">
+<div class="app-wrapper">
+    <main class="app-main" role="main" id="main">
+        <div class="app-content">
+            <div class="container-fluid">
+                @RenderBody()
+            </div>
+        </div>
+    </main>
+    <footer class="py-4 text-center border-top">
+        <p class="text-muted small">&copy; 2026 My Pills. All rights reserved.</p>
+    </footer>
+</div>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>

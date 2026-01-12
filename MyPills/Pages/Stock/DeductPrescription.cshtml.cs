@@ -10,7 +10,7 @@ public class DeductPrescription(ApplicationDbContext dbContext) : PageModel
     [BindProperty]
     public PrescriptionModel[] Prescriptions { get; set; }
     
-    public async Task OnGet(Guid? mId, int boxes)
+    public async Task<IActionResult> OnGet(Guid? mId, int boxes)
     {
         var userId = User.GetUserId();
         var today = DateTime.Today;
@@ -20,6 +20,11 @@ public class DeductPrescription(ApplicationDbContext dbContext) : PageModel
                         p.Medicines.Any(x => x.MedicineId == mId && x.Quantity > x.ConsumedQuantity))
             .ToListAsync();
 
+        if (prescriptions.Count == 0)
+        {
+            return RedirectToPage("/Overview");
+        }
+        
         Prescriptions = prescriptions
             .Select(x =>
             {
@@ -39,6 +44,8 @@ public class DeductPrescription(ApplicationDbContext dbContext) : PageModel
                     Date = x.Date
                 };
             }).ToArray();
+        
+        return Page();
     }
 
     public async Task<IActionResult> OnPost(Guid? mId, int boxes)

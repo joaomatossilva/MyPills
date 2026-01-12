@@ -1,40 +1,35 @@
 @page
 @model MyPills.Pages.Stock.CreateModel
 
-        @{
-        ViewData["Title"] = "Create";
-        }
-        
-        <h1>Create</h1>
-        
-    <h4>StockEntry</h4>
-    <hr />
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="container my-5">
+    <h2 class="mb-4">Add Stock to Medicine</h2>
+
     <div class="row">
-    <div class="col-md-4">
-    <form method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="StockEntry.MedicineId" class="control-label"></label>
-                <select asp-for="StockEntry.MedicineId" class ="form-control" asp-items="ViewBag.MedicineId" ></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="StockEntry.Quantity" class="control-label"></label>
-                <input asp-for="StockEntry.Quantity" class="form-control" />
-                <span asp-validation-for="StockEntry.Quantity" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="StockEntry.Type" class="control-label"></label>
-                <select asp-for="StockEntry.Type" class="form-control" asp-items="Html.GetEnumSelectList<StockEntryType>()" ></select>
-                <span asp-validation-for="StockEntry.Type" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        <div class="col-md-4">
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-floating mb-3">
+                    <select asp-for="StockEntry.MedicineId" class ="form-select" asp-items="ViewBag.MedicineId" ></select>
+                    <label asp-for="StockEntry.MedicineId" class="form-label"></label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="StockEntry.Quantity" class="form-control" />
+                    <label asp-for="StockEntry.Quantity" class="form-label"></label>
+                    <span asp-validation-for="StockEntry.Quantity" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <select asp-for="StockEntry.Type" class="form-select" asp-items="Html.GetEnumSelectList<StockEntryType>()" ></select>
+                    <label asp-for="StockEntry.Type" class="form-label"></label>
+                    <span asp-validation-for="StockEntry.Type" class="text-danger"></span>
+                </div>
+                <div class="form-floating">
+                    <input type="submit" value="Create" class="w-100 btn btn-lg btn-primary" />
+                </div>
+            </form>
+        </div>
     </div>
 </div>
-
-<div>
-    <a asp-page="Index">Back to List</a>
-</div>
-

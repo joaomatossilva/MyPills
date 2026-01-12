@@ -1,36 +1,32 @@
 @page
 @model MyPills.Pages.Prescriptions.CreateModel
 
-        @{
-        ViewData["Title"] = "Create";
-        }
+@{
+    ViewData["Title"] = "Create";
+}
         
-        <h1>Create</h1>
-        
-    <h4>Prescription</h4>
-    <hr />
+<div class="container my-5">
+    <h2 class="mb-4">Add new Prescription</h2>
+            
     <div class="row">
-    <div class="col-md-4">
-    <form method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Prescription.Date" class="control-label"></label>
-                <input asp-for="Prescription.Date" class="form-control" />
-                <span asp-validation-for="Prescription.Date" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Prescription.ExpiryDate" class="control-label"></label>
-                <input asp-for="Prescription.ExpiryDate" class="form-control" />
-                <span asp-validation-for="Prescription.ExpiryDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        <div class="col-md-4">
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Prescription.Date" class="form-control datepicker" />
+                    <label asp-for="Prescription.Date" class="form-label"></label>
+                    <span asp-validation-for="Prescription.Date" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Prescription.ExpiryDate" class="form-control datepicker" />
+                    <label asp-for="Prescription.ExpiryDate" class="form-label"></label>
+                    <span asp-validation-for="Prescription.ExpiryDate" class="text-danger"></span>
+                </div>
+                <div class="form-floating">
+                    <input type="submit" value="Create" class="w-100 btn btn-lg btn-primary" />
+                </div>
+            </form>
+        </div>
     </div>
-</div>
-
-<div>
-    <a asp-page="Index">Back to List</a>
 </div>
 

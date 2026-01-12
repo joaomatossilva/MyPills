@@ -5,13 +5,14 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<div class="container my-5">
+    <h2 class="mb-4">Manage Prescriptions</h2>
 
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
+    <p>
+        <a asp-page="Create" class="btn btn-success"><i class="fa-solid fa-plus"></i> <span>Add New Prescription</span></a>
+    </p>
+    <table class="table table-striped">
+        <thead>
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.Prescription[0].Date)
@@ -21,22 +22,22 @@
             </th>
             <th></th>
         </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.Prescription) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Date)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ExpiryDate)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.Prescription) {
+            <tr>
+                <td>
+                    <a asp-page="./Details" asp-route-id="@item.Id">@Html.DisplayFor(modelItem => item.Date)</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ExpiryDate)
+                </td>
+                <td class="text-end">
+                    <a asp-page="./Edit" asp-route-id="@item.Id"><i class="fa-regular fa-pen-to-square"></i></a>
+                    <a asp-page="./Delete" asp-route-id="@item.Id" class="link-danger"><i class="fa-solid fa-xmark"></i></a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

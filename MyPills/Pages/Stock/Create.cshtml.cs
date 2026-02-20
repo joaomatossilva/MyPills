@@ -21,7 +21,11 @@ namespace MyPills.Pages.Stock
 
         public IActionResult OnGet(Guid? id)
         {
-            ViewData["MedicineId"] = new SelectList(_context.Medicines, "Id", "Name");
+            var userId = User.GetUserId();
+            ViewData["MedicineId"] = new SelectList(
+                _context.Medicines.Where(m => m.UserId == userId),
+                "Id",
+                "Name");
             StockEntry = new StockEntryModel(id ?? Guid.Empty, StockEntryType.Box, 1);
             return Page();
         }

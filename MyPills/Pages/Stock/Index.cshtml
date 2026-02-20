@@ -5,13 +5,14 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<div class="container my-5">
+    <h2 class="mb-4">Stock Entries</h2>
 
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
+    <p>
+        <a asp-page="Create" class="btn btn-success"><i class="fa-solid fa-plus"></i> <span>Add Stock Entry</span></a>
+    </p>
+    <table class="table table-striped">
+        <thead>
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.StockEntry[0].Medicine)
@@ -25,28 +26,25 @@
             <th>
                 @Html.DisplayNameFor(model => model.StockEntry[0].Type)
             </th>
-            <th></th>
         </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.StockEntry) {
-        <tr>
-            <td>
-                <a asp-page="/Medicines/Details" asp-route-id="@item.Medicine.Id">@Html.DisplayFor(modelItem => item.Medicine.Name)</a>
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Date)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Quantity)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Type)
-            </td>
-            <td>
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.StockEntry) {
+            <tr>
+                <td>
+                    <a asp-page="Details" asp-route-id="@item.Id">@Html.DisplayFor(modelItem => item.Medicine.Name)</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Date)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Quantity)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Type)
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

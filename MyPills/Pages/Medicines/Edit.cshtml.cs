@@ -29,8 +29,7 @@ namespace MyPills.Pages.Medicines
                 return NotFound();
             }
 
-            var userId = User.GetUserId();
-            var medicine =  await _context.Medicines.FirstOrDefaultAsync(m => m.Id == id && m.UserId == userId);
+            var medicine = await _context.Medicines.FirstOrDefaultAsync(m => m.Id == id);
             if (medicine == null)
             {
                 return NotFound();
@@ -71,8 +70,7 @@ namespace MyPills.Pages.Medicines
 
         private bool MedicineExists(Guid id)
         {
-            var userId = User.GetUserId();
-            return _context.Medicines.Any(e => e.Id == id &&  e.UserId == userId);
+            return _context.Medicines.Any(e => e.Id == id);
         }
     }
 }

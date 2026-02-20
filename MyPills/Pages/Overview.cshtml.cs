@@ -14,12 +14,10 @@ public class OverviewModel(ApplicationDbContext dbContext) : PageModel
     public async Task OnGetAsync()
     {
         var today = DateTime.Today;
-        var userId = User.GetUserId();
         var medicines = await dbContext.Medicines
             .Include(x => x.Prescriptions)
             .ThenInclude(x => x.Prescription)
             .AsSplitQuery()
-            .Where(x => x.UserId == userId)
             .ToListAsync();
 
         Medicines = medicines.Select(x =>

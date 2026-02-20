@@ -28,8 +28,7 @@ namespace MyPills.Pages.PM
                 return NotFound();
             }
 
-            var userId = User.GetUserId();
-            var prescribedmedicine = await _context.PrescribedMedicine.FirstOrDefaultAsync(m => m.PrescriptionId == id && m.MedicineId == mId && m.Prescription.UserId == userId);
+            var prescribedmedicine = await _context.PrescribedMedicine.FirstOrDefaultAsync(m => m.PrescriptionId == id && m.MedicineId == mId);
 
             if (prescribedmedicine is not null)
             {
@@ -48,8 +47,7 @@ namespace MyPills.Pages.PM
                 return NotFound();
             }
 
-            var userId = User.GetUserId();
-            var prescribedmedicine = await _context.PrescribedMedicine.FirstOrDefaultAsync(m => m.PrescriptionId == id && m.MedicineId == mId && m.Prescription.UserId == userId);
+            var prescribedmedicine = await _context.PrescribedMedicine.FirstOrDefaultAsync(m => m.PrescriptionId == id && m.MedicineId == mId);
             
             if (prescribedmedicine != null)
             {

@@ -22,10 +22,8 @@ namespace MyPills.Pages.Stock
 
         public async Task OnGetAsync()
         {
-            var userId = User.GetUserId();
             StockEntry = await _context.StockEntries
                 .Include(s => s.Medicine)
-                .Where(x => x.UserId == userId)
                 .ToListAsync();
         }
     }

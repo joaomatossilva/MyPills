@@ -22,8 +22,7 @@ namespace MyPills.Pages.Medicines
 
         public async Task OnGetAsync()
         {
-            var userId = User.GetUserId();
-            Medicine = await _context.Medicines.Where(x => x.UserId == userId).ToListAsync();
+            Medicine = await _context.Medicines.ToListAsync();
         }
     }
 }

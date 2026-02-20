@@ -21,9 +21,8 @@ namespace MyPills.Pages.Stock
 
         public IActionResult OnGet(Guid? id)
         {
-            var userId = User.GetUserId();
             ViewData["MedicineId"] = new SelectList(
-                _context.Medicines.Where(m => m.UserId == userId),
+                _context.Medicines,
                 "Id",
                 "Name");
             StockEntry = new StockEntryModel(id ?? Guid.Empty, StockEntryType.Box, 1);
@@ -41,7 +40,7 @@ namespace MyPills.Pages.Stock
                 return Page();
             }
 
-            var userId =  User.GetUserId();
+            var userId = User.GetUserId();
             var stockEntry = new StockEntry
             {
                 UserId = userId,
@@ -52,7 +51,7 @@ namespace MyPills.Pages.Stock
             };
             _context.StockEntries.Add(stockEntry);
             
-            var medicine = _context.Medicines.FirstOrDefault(m => m.Id == stockEntry.MedicineId && m.UserId == userId);
+            var medicine = _context.Medicines.FirstOrDefault(m => m.Id == stockEntry.MedicineId);
             if (medicine == null)
             {
                 return Page();

@@ -26,8 +26,8 @@ namespace MyPills.Pages.Stock
             {
                 return NotFound();
             }
-            var userId = User.GetUserId();
-            var stockentry = await _context.StockEntries.FirstOrDefaultAsync(m => m.Id == id && m.UserId == userId);
+
+            var stockentry = await _context.StockEntries.FirstOrDefaultAsync(m => m.Id == id);
 
             if (stockentry is not null)
             {

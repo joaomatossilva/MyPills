@@ -12,11 +12,10 @@ public class DeductPrescription(ApplicationDbContext dbContext) : PageModel
     
     public async Task<IActionResult> OnGet(Guid? mId, int boxes)
     {
-        var userId = User.GetUserId();
         var today = DateTime.Today;
         var prescriptions = await dbContext.Prescriptions
             .Include(p => p.Medicines)
-            .Where(p => p.UserId == userId && p.ExpiryDate > today &&
+            .Where(p => p.ExpiryDate > today &&
                         p.Medicines.Any(x => x.MedicineId == mId && x.Quantity > x.ConsumedQuantity))
             .ToListAsync();
 
@@ -50,11 +49,10 @@ public class DeductPrescription(ApplicationDbContext dbContext) : PageModel
 
     public async Task<IActionResult> OnPost(Guid? mId, int boxes)
     {
-        var userId = User.GetUserId();
         var prescriptionIds = Prescriptions.Select(x => x.Id).ToArray();
 
         var medicines = await dbContext.PrescribedMedicine
-            .Where(x => x.Prescription.UserId == userId && x.MedicineId == mId && prescriptionIds.Contains(x.PrescriptionId))
+            .Where(x => x.MedicineId == mId && prescriptionIds.Contains(x.PrescriptionId))
             .ToListAsync();
 
         foreach (var medicine in medicines)

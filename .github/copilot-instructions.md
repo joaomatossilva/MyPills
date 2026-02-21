@@ -1,7 +1,8 @@
 # Copilot Instructions (Backend)
 
 ## Process
-- Always show a short implementation plan before making code changes.
+- Always show the implementation plan before making code changes, and wait for approval before proceeding with the implementation.
+- Don't create any documentation files with the summary or explanation of the execution of the plan;
 
 ## Architecture and Design
 - Follow SOLID principles; prefer small, focused types and clear responsibilities.

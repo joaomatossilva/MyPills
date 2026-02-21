@@ -13,6 +13,18 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IContextUser, HttpContextUser>();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+// Add controllers for API endpoints with camelCase JSON serialization
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
+
+builder.Services.AddSpaStaticFiles(configuration =>
+{
+    configuration.RootPath = "ClientApp/dist";
+});
+
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages(opt =>
@@ -45,13 +57,43 @@ else
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(); // Serve static files from wwwroot
 
 app.UseRouting();
 
 app.UseAuthorization();
 
+// Map API controllers and Razor Pages at root level
 app.MapStaticAssets();
 app.MapRazorPages()
-   .WithStaticAssets();
+    .WithStaticAssets();
+app.MapControllers();
+
+// SPA Configuration - only for /app path
+// This should be AFTER MapRazorPages so Razor Pages get priority
+if (app.Environment.IsDevelopment())
+{
+    // In development, proxy /app to Vite dev server
+    app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments("/app"), appBuilder =>
+    {
+        appBuilder.UseSpa(spa =>
+        {
+            spa.Options.SourcePath = "ClientApp";
+            spa.UseProxyToSpaDevelopmentServer("http://localhost:5173");
+        });
+    });
+}
+else
+{
+    // In production, serve from built files
+    app.UseSpaStaticFiles();
+    app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments("/app"), appBuilder =>
+    {
+        appBuilder.UseSpa(spa =>
+        {
+            spa.Options.SourcePath = "ClientApp";
+        });
+    });
+}
 
 app.Run();

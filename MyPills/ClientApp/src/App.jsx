@@ -1,21 +1,24 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
-import Home from './pages/Home'
 import Overview from './pages/Overview'
 import Test from './pages/Test'
+import { AuthProvider } from './contexts/AuthContext'
+import Splash from './pages/Splash'
 import './App.css'
 
 function App() {
   return (
-    <Router basename="/app">
-      <Layout>
+    <AuthProvider>
+      <Router basename="/app">
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/overview" element={<Overview />} />
-          <Route path="/test" element={<Test />} />
+          <Route path="/" element={<Splash />} />
+          <Route element={<Layout />}>
+            <Route path="overview" element={<Overview />} />
+            <Route path="test" element={<Test />} />
+          </Route>
         </Routes>
-      </Layout>
-    </Router>
+      </Router>
+    </AuthProvider>
   )
 }
 

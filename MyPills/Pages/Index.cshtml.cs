@@ -1,19 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using MyPills.Data;
 
 namespace MyPills.Pages;
 
-public class IndexModel(ApplicationDbContext dbContext) : PageModel
+public class IndexModel : PageModel
 {
-    public IActionResult OnGetAsync()
+    public IActionResult OnGet()
     {
-        if (User?.Identity?.IsAuthenticated == true)
-        {
-            return RedirectToPage("/Overview");
-        }
-        
-        return Page();
+        return Redirect("/app");
     }
 }

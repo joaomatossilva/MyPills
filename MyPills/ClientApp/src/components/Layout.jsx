@@ -8,6 +8,7 @@ function Navigation() {
     <nav style={{ display: 'flex', alignItems: 'center' }}>
       <ul>
         <li><Link to="/">Home</Link></li>
+        <li><Link to="/overview">Overview</Link></li>
         <li><Link to="/test">Test</Link></li>
       </ul>
       <div className="auth-info">
@@ -38,4 +39,3 @@ export default function Layout({ children }) {
     </AuthProvider>
   )
 }
-

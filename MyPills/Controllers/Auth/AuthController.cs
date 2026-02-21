@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using MyPills.Controllers.Auth;
 
-namespace MyPills.Controllers;
+namespace MyPills.Controllers.Auth;
 
 /// <summary>
 /// Authentication API endpoints for checking user authentication status.
@@ -15,7 +14,7 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <returns>Authentication status with username if authenticated</returns>
     [HttpGet("status")]
-   //[ProduceResponseType(typeof(GetAuthStatusResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetAuthStatusResponse), StatusCodes.Status200OK)]
     public IActionResult GetAuthStatus()
     {
         var response = new GetAuthStatusResponse
@@ -27,6 +26,3 @@ public class AuthController : ControllerBase
         return Ok(response);
     }
 }
-
-
-

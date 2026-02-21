@@ -8,6 +8,7 @@ function Navigation() {
     <nav style={{ display: 'flex', alignItems: 'center' }}>
       <ul>
         <li><Link to="/overview">Overview</Link></li>
+        <li><Link to="/medicines">Medicines</Link></li>
         <li><Link to="/test">Test</Link></li>
       </ul>
       <div className="auth-info">

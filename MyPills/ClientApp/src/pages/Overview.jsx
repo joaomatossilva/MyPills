@@ -43,28 +43,40 @@ function OverviewContent() {
   }
 
   return (
-    <div className="overview">
-      <h2 className="overview-title">Overview</h2>
-      <div className="overview-grid">
+    <div className="container my-5">
+      <h2 className="mb-4">Overview</h2>
+
+      <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {medicines.map(item => (
-          <div className="overview-card" key={item.medicineId}>
-            <div className="overview-card-header">{item.name}</div>
-            <div className="overview-card-body">
-              <div className="overview-row">
-                <span>Remaining Pills</span>
-                <span className="badge badge-success">{item.availableQuantity}</span>
+          <div className="col" key={item.medicineId}>
+            <div className="card h-100 shadow-sm">
+              <h5 className="card-header fw-bold">{item.name}</h5>
+              <div className="card-body">
+                <ul className="list-group list-group-flush">
+                  <li className="list-group-item d-flex justify-content-between align-items-center">
+                    Remaining Pills
+                    <span className="badge bg-success rounded-pill">{item.availableQuantity}</span>
+                  </li>
+                  <li className="list-group-item d-flex justify-content-between align-items-center">
+                    Estimated Finish
+                    <span className="text-primary fw-semibold">
+                      {new Date(item.estimatedDate).toLocaleDateString()}
+                    </span>
+                  </li>
+                  <li className="list-group-item d-flex justify-content-between align-items-center">
+                    Prescriptions
+                    <span className="badge bg-secondary rounded-pill">{item.boxesInPrescription}</span>
+                  </li>
+                </ul>
               </div>
-              <div className="overview-row">
-                <span>Estimated Finish</span>
-                <span className="text-primary">{new Date(item.estimatedDate).toLocaleDateString()}</span>
+              <div className="card-footer bg-white border-top-0 pb-3">
+                <a
+                  className="btn btn-outline-primary btn-sm w-100"
+                  href={`/Stock/Create?id=${item.medicineId}`}
+                >
+                  + Add Stock
+                </a>
               </div>
-              <div className="overview-row">
-                <span>Prescriptions</span>
-                <span className="badge badge-secondary">{item.boxesInPrescription}</span>
-              </div>
-            </div>
-            <div className="overview-card-footer">
-              <a className="btn btn-outline" href={`/Stock/Create?id=${item.medicineId}`}>+ Add Stock</a>
             </div>
           </div>
         ))}
@@ -80,4 +92,3 @@ export default function Overview() {
     </ProtectedRoute>
   )
 }
-

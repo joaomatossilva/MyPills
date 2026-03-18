@@ -26,7 +26,7 @@
                         <i class="fa-solid fa-list"></i>
                     </a>
                 </li>
-                <li class="nav-item d-none d-md-block"><a asp-area="" asp-page="/Index" class="nav-link">Home</a></li>
+                <li class="nav-item d-none d-md-block"><a href="/" class="nav-link">Home</a></li>
             </ul>
             <partial name="_LoginPartial"/>
         </div>
@@ -35,7 +35,7 @@
     <!-- Side Navigation -->
     <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
         <div class="sidebar-brand">
-            <a asp-area="" asp-page="/Index" class="brand-link">
+            <a href="/" class="brand-link">
                 @*
                 <img
                     src="./assets/img/AdminLTELogo.png"
@@ -56,28 +56,28 @@
                     id="navigation">
                     
                     <li class="nav-item">
-                        <a asp-area="" asp-page="/Index" class="nav-link">
+                        <a href="/" class="nav-link">
                             <i class="nav-icon bi bi-download"></i>
                             <p>Home</p>
                         </a>
                     </li>
                     
                     <li class="nav-item">
-                        <a href="/app/medicines" class="nav-link">
+                        <a href="/medicines" class="nav-link">
                             <i class="nav-icon bi bi-download"></i>
                             <p>Medicines</p>
                         </a>
                     </li>
                     
                     <li class="nav-item">
-                        <a href="/app/stock" class="nav-link">
+                        <a href="/stock" class="nav-link">
                             <i class="nav-icon bi bi-download"></i>
                             <p>Stock</p>
                         </a>
                     </li>
                     
                     <li class="nav-item">
-                        <a href="/app/prescriptions" class="nav-link">
+                        <a href="/prescriptions" class="nav-link">
                             <i class="nav-icon bi bi-download"></i>
                             <p>Prescriptions</p>
                         </a>

@@ -26,9 +26,9 @@ import './App.css'
 
 function App() {
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <Router basename="/app">
+      <LanguageProvider>
+        <AuthProvider>
+        <Router>
           <Routes>
             <Route path="/" element={<Splash />} />
             <Route element={<Layout />}>

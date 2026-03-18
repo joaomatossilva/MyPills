@@ -64,12 +64,12 @@ The app uses cookie-based authentication provided by ASP.NET Core Identity:
 When running with the ASP.NET Core app, access the React SPA at:
 
 ```
-https://localhost:7130/app
+https://localhost:7130/
 ```
 
 ## Routes
 
-- `/app` - Home page (public)
-- `/app/test` - Test page (requires authentication)
+- `/` - Home page (public)
+- `/test` - Test page (requires authentication)
 
 

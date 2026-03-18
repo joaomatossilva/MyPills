@@ -9,6 +9,14 @@ on:
       - master
   workflow_dispatch:
 
+env:
+  AZURE_WEBAPP_NAME: MyPills
+  CLIENT_APP_PATH: MyPills/ClientApp
+  DOTNET_VERSION: 10.x
+  NODE_VERSION: 22.x
+  PROJECT_PATH: MyPills/MyPills.csproj
+  PUBLISH_PATH: ${{ github.workspace }}/publish
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,22 +26,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ${{ env.CLIENT_APP_PATH }}/package-lock.json
+
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.PROJECT_PATH }}
 
       - name: Build with dotnet
-        run: dotnet build --configuration Release
+        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish ${{ env.PROJECT_PATH }} --configuration Release --output ${{ env.PUBLISH_PATH }} --no-build
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          name: published-app
+          path: ${{ env.PUBLISH_PATH }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -46,7 +64,8 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: .net-app
+          name: published-app
+          path: ${{ env.PUBLISH_PATH }}
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -59,7 +78,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'MyPills'
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
           slot-name: 'Production'
-          package: .
+          package: ${{ env.PUBLISH_PATH }}
           

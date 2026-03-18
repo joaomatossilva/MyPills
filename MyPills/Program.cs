@@ -1,4 +1,5 @@
 using System.Globalization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -35,11 +36,6 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     });
-
-builder.Services.AddSpaStaticFiles(configuration =>
-{
-    configuration.RootPath = "ClientApp/dist";
-});
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -78,35 +74,45 @@ app.UseAuthorization();
 
 // Map API controllers and Razor Pages at root level
 app.MapStaticAssets();
+app.MapControllers();
+if (!app.Environment.IsDevelopment())
+{
+    app.MapGet("/", () => Results.File(
+        Path.Combine(app.Environment.WebRootPath, "index.html"),
+        "text/html"));
+}
 app.MapRazorPages()
     .WithStaticAssets();
-app.MapControllers();
 
-// SPA Configuration - only for /app path
-// This should be AFTER MapRazorPages so Razor Pages get priority
 if (app.Environment.IsDevelopment())
 {
-    // In development, proxy /app to Vite dev server
-    app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments("/app"), appBuilder =>
-    {
-        appBuilder.UseSpa(spa =>
+    app.MapWhen(
+        context => IsSpaRequest(context.Request.Path),
+        appBuilder =>
         {
-            spa.Options.SourcePath = "ClientApp";
-            spa.UseProxyToSpaDevelopmentServer("http://localhost:5173");
+            appBuilder.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "ClientApp";
+                spa.UseProxyToSpaDevelopmentServer("http://localhost:5173");
+            });
         });
-    });
 }
 else
 {
-    // In production, serve from built files
-    app.UseSpaStaticFiles();
-    app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments("/app"), appBuilder =>
-    {
-        appBuilder.UseSpa(spa =>
-        {
-            spa.Options.SourcePath = "ClientApp";
-        });
-    });
+    app.MapFallbackToFile("{*path:nonfile}", "index.html");
 }
 
 app.Run();
+
+static bool IsSpaRequest(PathString path)
+{
+    var pathValue = path.Value ?? string.Empty;
+
+    return !path.StartsWithSegments("/api")
+        && !path.StartsWithSegments("/Identity")
+        && !path.StartsWithSegments("/lib")
+        && !path.StartsWithSegments("/css")
+        && !path.StartsWithSegments("/js")
+        && !string.Equals(pathValue, "/favicon.ico", StringComparison.OrdinalIgnoreCase)
+        && !string.Equals(pathValue, "/MyPills.styles.css", StringComparison.OrdinalIgnoreCase);
+}

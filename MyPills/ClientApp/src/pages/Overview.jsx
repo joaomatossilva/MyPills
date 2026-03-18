@@ -1,5 +1,7 @@
+import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import ProtectedRoute from '../components/ProtectedRoute'
+import { requestJson } from '../api/apiClient'
 
 function OverviewContent() {
   const [medicines, setMedicines] = useState([])
@@ -9,20 +11,12 @@ function OverviewContent() {
   useEffect(() => {
     const load = async () => {
       try {
-        const response = await fetch('/api/overview', {
-          credentials: 'include'
-        })
-
-        if (response.status === 401) {
-          window.location.href = '/Identity/Account/Login'
-          return
-        }
+        const { response, data } = await requestJson('/api/overview')
 
         if (!response.ok) {
           throw new Error('Failed to load overview')
         }
 
-        const data = await response.json()
         setMedicines(data.medicines ?? [])
       } catch (err) {
         setError(err.message ?? 'Failed to load overview')
@@ -70,12 +64,12 @@ function OverviewContent() {
                 </ul>
               </div>
               <div className="card-footer bg-white border-top-0 pb-3">
-                <a
+                <Link
                   className="btn btn-outline-primary btn-sm w-100"
-                  href={`/Stock/Create?id=${item.medicineId}`}
+                  to={`/stock/new?medicineId=${item.medicineId}`}
                 >
                   + Add Stock
-                </a>
+                </Link>
               </div>
             </div>
           </div>

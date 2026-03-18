@@ -66,12 +66,9 @@ function MedicineDetailsContent() {
 
       <h2 className="mb-4">Latest Stocks</h2>
       <p>
-        <a
-          className="btn btn-success"
-          href={`/Stock/Create?id=${id}`}
-        >
+        <Link className="btn btn-success" to={`/stock/new?medicineId=${id}`}>
           <i className="fa-solid fa-plus"></i> <span>Add Stock Entry</span>
-        </a>
+        </Link>
       </p>
 
       {stockEntries.length === 0 ? (

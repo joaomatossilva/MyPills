@@ -1,0 +1,12 @@
+namespace MyPills.Controllers.Stock;
+
+public sealed class GetStockEntriesItem
+{
+    public Guid Id { get; init; }
+    public Guid MedicineId { get; init; }
+    public string MedicineName { get; init; } = string.Empty;
+    public DateTimeOffset Date { get; init; }
+    public int Quantity { get; init; }
+    public string Type { get; init; } = string.Empty;
+}
+

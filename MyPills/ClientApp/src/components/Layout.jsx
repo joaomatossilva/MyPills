@@ -84,16 +84,16 @@ export default function Layout() {
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <a href="/Stock/Index" className="nav-link">
+                  <Link to="/stock" className="nav-link">
                     <i className="nav-icon bi bi-download"></i>
                     <p>Stock</p>
-                  </a>
+                  </Link>
                 </li>
                 <li className="nav-item">
-                  <a href="/Prescriptions/Index" className="nav-link">
+                  <Link to="/prescriptions" className="nav-link">
                     <i className="nav-icon bi bi-download"></i>
                     <p>Prescriptions</p>
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </nav>

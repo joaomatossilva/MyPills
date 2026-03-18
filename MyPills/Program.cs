@@ -116,3 +116,7 @@ static bool IsSpaRequest(PathString path)
         && !string.Equals(pathValue, "/favicon.ico", StringComparison.OrdinalIgnoreCase)
         && !string.Equals(pathValue, "/MyPills.styles.css", StringComparison.OrdinalIgnoreCase);
 }
+
+public partial class Program
+{
+}

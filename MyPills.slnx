@@ -2,5 +2,8 @@
   <Folder Name="/Solution Items/">
     <File Path="compose.yaml" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MyPills.Api.IntegrationTests/MyPills.Api.IntegrationTests.csproj" />
+  </Folder>
   <Project Path="MyPills/MyPills.csproj" />
 </Solution>

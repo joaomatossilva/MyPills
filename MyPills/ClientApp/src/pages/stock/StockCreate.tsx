@@ -5,6 +5,8 @@ import { formatValidationError, requestJson } from '../../api/apiClient'
 import { useLanguage } from '../../contexts/LanguageContext'
 import type { CreateStockEntryResponse, MedicinesResponse, MedicineListItem, ValidationErrorResponse } from '../../types/api'
 
+const stockEntryTypes = [1, 2, 3, 4]
+
 function StockCreateContent() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -55,7 +57,7 @@ function StockCreateContent() {
       return
     }
 
-    if (![1, 2].includes(parsedType)) {
+    if (!stockEntryTypes.includes(parsedType)) {
       setError(text.stock.validation.typeRequired)
       return
     }
@@ -135,7 +137,9 @@ function StockCreateContent() {
                 onChange={event => setType(event.target.value)}
               >
                 <option value="1">{text.stock.box}</option>
-                <option value="2">{text.stock.manual}</option>
+                <option value="2">{text.stock.increase}</option>
+                <option value="3">{text.stock.decrease}</option>
+                <option value="4">{text.stock.set}</option>
               </select>
               <label className="form-label">{text.stock.type}</label>
             </div>

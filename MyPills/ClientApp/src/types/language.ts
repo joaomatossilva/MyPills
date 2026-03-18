@@ -182,7 +182,9 @@ export interface TranslationDictionary {
     quantity: string
     type: string
     box: string
-    manual: string
+    increase: string
+    decrease: string
+    set: string
     failedList: string
     failedDetails: string
     failedCreate: string

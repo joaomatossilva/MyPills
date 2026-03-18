@@ -3,19 +3,8 @@ import { useParams, Link } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from './medicinesApi'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { getStockEntryTypeLabel } from '../../utils/stockEntryTypeLabels'
 import type { MedicineDetails, MedicineStockEntry } from '../../types/api'
-
-function getStockEntryTypeLabel(type: string, boxLabel: string, manualLabel: string) {
-  if (type === 'Box') {
-    return boxLabel
-  }
-
-  if (type === 'Manual') {
-    return manualLabel
-  }
-
-  return type
-}
 
 function MedicineDetailsContent() {
   const { id } = useParams()
@@ -102,7 +91,7 @@ function MedicineDetailsContent() {
               <tr key={item.id}>
                 <td>{new Date(item.date).toLocaleDateString(locale)}</td>
                 <td>{item.quantity}</td>
-                <td>{getStockEntryTypeLabel(item.type, text.stock.box, text.stock.manual)}</td>
+                <td>{getStockEntryTypeLabel(item.type, text.stock)}</td>
               </tr>
             ))}
           </tbody>

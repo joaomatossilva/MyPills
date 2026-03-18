@@ -20,5 +20,7 @@ public class StockEntry
 public enum StockEntryType
 {
     Box = 1,
-    Manual = 2
+    Increase = 2,
+    Decrease = 3,
+    Set = 4
 }

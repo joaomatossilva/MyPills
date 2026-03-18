@@ -4,19 +4,8 @@ import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from '../../api/apiClient'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { formatDateTime } from '../../utils/dateFormatting'
+import { getStockEntryTypeLabel } from '../../utils/stockEntryTypeLabels'
 import type { StockEntriesResponse, StockEntryListItem } from '../../types/api'
-
-function getStockEntryTypeLabel(type: string, boxLabel: string, manualLabel: string) {
-  if (type === 'Box') {
-    return boxLabel
-  }
-
-  if (type === 'Manual') {
-    return manualLabel
-  }
-
-  return type
-}
 
 function StockListContent() {
   const [stockEntries, setStockEntries] = useState<StockEntryListItem[]>([])
@@ -80,7 +69,7 @@ function StockListContent() {
                 </td>
                 <td>{formatDateTime(item.date, locale)}</td>
                 <td>{item.quantity}</td>
-                <td>{getStockEntryTypeLabel(item.type, text.stock.box, text.stock.manual)}</td>
+                <td>{getStockEntryTypeLabel(item.type, text.stock)}</td>
               </tr>
             ))}
           </tbody>

@@ -4,18 +4,7 @@ import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from '../../api/apiClient'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { formatDateTime } from '../../utils/dateFormatting'
-
-function getStockEntryTypeLabel(type: string, boxLabel: string, manualLabel: string) {
-  if (type === 'Box') {
-    return boxLabel
-  }
-
-  if (type === 'Manual') {
-    return manualLabel
-  }
-
-  return type
-}
+import { getStockEntryTypeLabel } from '../../utils/stockEntryTypeLabels'
 
 function StockDetailsContent() {
   const { id } = useParams()
@@ -66,7 +55,7 @@ function StockDetailsContent() {
         <dt className="col-sm-2">{text.stock.quantity}</dt>
         <dd className="col-sm-10">{stockEntry.quantity}</dd>
         <dt className="col-sm-2">{text.stock.type}</dt>
-        <dd className="col-sm-10">{getStockEntryTypeLabel(stockEntry.type, text.stock.box, text.stock.manual)}</dd>
+        <dd className="col-sm-10">{getStockEntryTypeLabel(stockEntry.type, text.stock)}</dd>
       </dl>
 
       <div>

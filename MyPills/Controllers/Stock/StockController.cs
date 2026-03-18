@@ -101,14 +101,11 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
 
         medicine.StockDate = today;
         medicine.StockQuantity = Math.Max(0, medicine.StockQuantity - daysDiff);
-        if (request.Type == StockEntryType.Manual)
-        {
-            medicine.StockQuantity += request.Quantity;
-        }
-        else
-        {
-            medicine.StockQuantity += request.Quantity * medicine.BoxSize;
-        }
+        medicine.StockQuantity = ApplyStockQuantity(
+            request.Type,
+            medicine.StockQuantity,
+            request.Quantity,
+            medicine.BoxSize);
 
         var stockEntry = new StockEntry
         {
@@ -142,6 +139,18 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
                 RequiresPrescriptionDeduction = requiresPrescriptionDeduction,
                 DeductionBoxes = requiresPrescriptionDeduction ? stockEntry.Quantity : 0
             });
+    }
+
+    private static int ApplyStockQuantity(StockEntryType type, int currentQuantity, int quantity, int boxSize)
+    {
+        return type switch
+        {
+            StockEntryType.Box => currentQuantity + (quantity * boxSize),
+            StockEntryType.Increase => currentQuantity + quantity,
+            StockEntryType.Decrease => Math.Max(0, currentQuantity - quantity),
+            StockEntryType.Set => quantity,
+            _ => throw new InvalidOperationException($"Unsupported stock entry type '{type}'.")
+        };
     }
 
     [HttpGet("prescription-deductions")]

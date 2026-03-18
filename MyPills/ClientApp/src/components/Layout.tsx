@@ -2,9 +2,11 @@ import type { NavLinkRenderProps } from 'react-router-dom'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useLanguage } from '../contexts/LanguageContext'
 
 export default function Layout() {
   const { isAuthenticated, username, login, logout, loading } = useAuth()
+  const { language, setLanguage, text, availableLanguages } = useLanguage()
   const getNavLinkClass = ({ isActive }: NavLinkRenderProps) => `nav-link${isActive ? ' active' : ''}`
 
   useEffect(() => {
@@ -18,8 +20,8 @@ export default function Layout() {
   return (
     <>
       <div className="skip-links">
-        <a href="#main" className="skip-link">Skip to main content</a>
-        <a href="#navigation" className="skip-link">Skip to navigation</a>
+        <a href="#main" className="skip-link">{text.layout.skipToContent}</a>
+        <a href="#navigation" className="skip-link">{text.layout.skipToNavigation}</a>
       </div>
       <div className="app-wrapper app-shell">
         <nav className="app-header app-topbar navbar navbar-expand bg-body">
@@ -31,26 +33,41 @@ export default function Layout() {
                 </a>
               </li>
               <li className="nav-item d-none d-md-block">
-                <Link to="/" className="nav-link">Home</Link>
+                <Link to="/" className="nav-link">{text.layout.home}</Link>
               </li>
             </ul>
             <ul className="navbar-nav ms-auto">
+              <li className="nav-item app-language-picker">
+                <label className="app-language-label" htmlFor="app-language-select">{text.layout.languageLabel}</label>
+                <select
+                  id="app-language-select"
+                  className="form-select form-select-sm app-language-select"
+                  value={language}
+                  onChange={event => setLanguage(event.target.value as typeof language)}
+                >
+                  {availableLanguages.map(option => (
+                    <option key={option.code} value={option.code}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </li>
               {loading ? (
                 <li className="nav-item">
-                  <span className="nav-link app-user-pill">Loading...</span>
+                  <span className="nav-link app-user-pill">{text.layout.loading}</span>
                 </li>
               ) : isAuthenticated ? (
                 <>
                   <li className="nav-item">
-                    <span className="nav-link app-user-pill">Welcome, {username}</span>
+                    <span className="nav-link app-user-pill">{text.layout.welcome(username)}</span>
                   </li>
                   <li className="nav-item">
-                    <button type="button" className="btn btn-link nav-link app-nav-button" onClick={logout}>Logout</button>
+                    <button type="button" className="btn btn-link nav-link app-nav-button" onClick={logout}>{text.layout.logout}</button>
                   </li>
                 </>
               ) : (
                 <li className="nav-item">
-                  <button type="button" className="btn btn-link nav-link app-nav-button" onClick={login}>Login</button>
+                  <button type="button" className="btn btn-link nav-link app-nav-button" onClick={login}>{text.layout.login}</button>
                 </li>
               )}
             </ul>
@@ -76,25 +93,25 @@ export default function Layout() {
                 <li className="nav-item">
                   <NavLink to="/" end className={getNavLinkClass}>
                     <i className="nav-icon bi bi-download"></i>
-                    <p>Home</p>
+                    <p>{text.layout.home}</p>
                   </NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink to="/medicines" className={getNavLinkClass}>
                     <i className="nav-icon bi bi-download"></i>
-                    <p>Medicines</p>
+                    <p>{text.layout.medicines}</p>
                   </NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink to="/stock" className={getNavLinkClass}>
                     <i className="nav-icon bi bi-download"></i>
-                    <p>Stock</p>
+                    <p>{text.layout.stock}</p>
                   </NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink to="/prescriptions" className={getNavLinkClass}>
                     <i className="nav-icon bi bi-download"></i>
-                    <p>Prescriptions</p>
+                    <p>{text.layout.prescriptions}</p>
                   </NavLink>
                 </li>
               </ul>
@@ -107,7 +124,7 @@ export default function Layout() {
         </main>
 
         <footer className="app-footer app-footer-shell">
-          &copy; 2026 - MyPills
+          &copy; 2026 - {text.layout.footer}
         </footer>
       </div>
     </>

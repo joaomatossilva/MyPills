@@ -1,3 +1,5 @@
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MyPills;
@@ -12,6 +14,20 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IContextUser, HttpContextUser>();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.AddLocalization();
+
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[]
+    {
+        new CultureInfo("en"),
+        new CultureInfo("pt")
+    };
+
+    options.DefaultRequestCulture = new RequestCulture("en");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+});
 
 // Add controllers for API endpoints with camelCase JSON serialization
 builder.Services.AddControllers()
@@ -54,6 +70,7 @@ else
 
 app.UseHttpsRedirection();
 app.UseStaticFiles(); // Serve static files from wwwroot
+app.UseRequestLocalization();
 
 app.UseRouting();
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { formatValidationError, requestJson } from '../../api/apiClient'
+import { useLanguage } from '../../contexts/LanguageContext'
 import type { CreateStockEntryResponse, MedicinesResponse, MedicineListItem, ValidationErrorResponse } from '../../types/api'
 
 function StockCreateContent() {
@@ -14,27 +15,28 @@ function StockCreateContent() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const { text } = useLanguage()
 
   useEffect(() => {
     const load = async () => {
       try {
         const { response, data } = await requestJson<MedicinesResponse>('/api/medicines')
         if (!response.ok) {
-          throw new Error('Failed to load medicines.')
+          throw new Error(text.medicines.failedList)
         }
 
         const items = data?.medicines ?? []
         setMedicines(items)
         setMedicineId(currentMedicineId => currentMedicineId || items[0]?.id || '')
       } catch (err) {
-        setError(err.message ?? 'Failed to load form.')
+        setError((err as Error).message ?? text.stock.failedLoadForm)
       } finally {
         setLoading(false)
       }
     }
 
     load()
-  }, [])
+  }, [text.medicines.failedList, text.stock.failedLoadForm])
 
   const onSubmit = async event => {
     event.preventDefault()
@@ -44,17 +46,17 @@ function StockCreateContent() {
     const parsedType = Number(type)
 
     if (!medicineId) {
-      setError('Medicine is required.')
+      setError(text.stock.validation.medicineRequired)
       return
     }
 
     if (!Number.isInteger(parsedQuantity) || parsedQuantity <= 0) {
-      setError('Quantity must be a positive whole number.')
+      setError(text.stock.validation.quantityPositive)
       return
     }
 
     if (![1, 2].includes(parsedType)) {
-      setError('Type is required.')
+      setError(text.stock.validation.typeRequired)
       return
     }
 
@@ -81,14 +83,14 @@ function StockCreateContent() {
 
       navigate('/overview')
     } catch (err) {
-      setError(err.message ?? 'Failed to create stock entry.')
+      setError((err as Error).message ?? text.stock.failedCreate)
     } finally {
       setSaving(false)
     }
   }
 
   if (loading) {
-    return <div className="loading">Loading form...</div>
+    return <div className="loading">{text.common.loadingForm}</div>
   }
 
   if (error && medicines.length === 0) {
@@ -97,7 +99,7 @@ function StockCreateContent() {
 
   return (
     <div className="container my-5">
-      <h2 className="mb-4">Add Stock to Medicine</h2>
+      <h2 className="mb-4">{text.stock.createTitle}</h2>
       <div className="row">
         <div className="col-md-4">
           <form onSubmit={onSubmit}>
@@ -114,7 +116,7 @@ function StockCreateContent() {
                   </option>
                 ))}
               </select>
-              <label className="form-label">Medicine</label>
+              <label className="form-label">{text.stock.medicine}</label>
             </div>
             <div className="form-floating mb-3">
               <input
@@ -124,7 +126,7 @@ function StockCreateContent() {
                 value={quantity}
                 onChange={event => setQuantity(event.target.value)}
               />
-              <label className="form-label">Quantity</label>
+              <label className="form-label">{text.stock.quantity}</label>
             </div>
             <div className="form-floating mb-3">
               <select
@@ -132,19 +134,19 @@ function StockCreateContent() {
                 value={type}
                 onChange={event => setType(event.target.value)}
               >
-                <option value="1">Box</option>
-                <option value="2">Manual</option>
+                <option value="1">{text.stock.box}</option>
+                <option value="2">{text.stock.manual}</option>
               </select>
-              <label className="form-label">Type</label>
+              <label className="form-label">{text.stock.type}</label>
             </div>
             <div className="form-floating">
               <button className="w-100 btn btn-lg btn-primary" type="submit" disabled={saving}>
-                {saving ? 'Creating...' : 'Create'}
+                {saving ? `${text.common.create}...` : text.common.create}
               </button>
             </div>
           </form>
           <div className="mt-3">
-            <Link to="/stock" className="btn btn-secondary">Back to List</Link>
+            <Link to="/stock" className="btn btn-secondary">{text.common.backToList}</Link>
           </div>
         </div>
       </div>

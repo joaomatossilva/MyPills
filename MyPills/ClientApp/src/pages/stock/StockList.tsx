@@ -2,35 +2,49 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from '../../api/apiClient'
+import { useLanguage } from '../../contexts/LanguageContext'
 import { formatDateTime } from '../../utils/dateFormatting'
 import type { StockEntriesResponse, StockEntryListItem } from '../../types/api'
+
+function getStockEntryTypeLabel(type: string, boxLabel: string, manualLabel: string) {
+  if (type === 'Box') {
+    return boxLabel
+  }
+
+  if (type === 'Manual') {
+    return manualLabel
+  }
+
+  return type
+}
 
 function StockListContent() {
   const [stockEntries, setStockEntries] = useState<StockEntryListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { text, locale } = useLanguage()
 
   useEffect(() => {
     const load = async () => {
       try {
         const { response, data } = await requestJson<StockEntriesResponse>('/api/stock')
         if (!response.ok) {
-          throw new Error('Failed to load stock entries.')
+          throw new Error(text.stock.failedList)
         }
 
         setStockEntries(data?.stockEntries ?? [])
       } catch (err) {
-        setError(err.message ?? 'Failed to load stock entries.')
+        setError((err as Error).message ?? text.stock.failedList)
       } finally {
         setLoading(false)
       }
     }
 
     load()
-  }, [])
+  }, [text.stock.failedList])
 
   if (loading) {
-    return <div className="loading">Loading stock entries...</div>
+    return <div className="loading">{text.stock.loadingList}</div>
   }
 
   if (error) {
@@ -39,23 +53,23 @@ function StockListContent() {
 
   return (
     <div className="container my-5">
-      <h2 className="mb-4">Stock Entries</h2>
+      <h2 className="mb-4">{text.stock.title}</h2>
       <p>
         <Link to="/stock/new" className="btn btn-success">
-          <i className="fa-solid fa-plus"></i> <span>Add Stock Entry</span>
+          <i className="fa-solid fa-plus"></i> <span>{text.stock.add}</span>
         </Link>
       </p>
 
       {stockEntries.length === 0 ? (
-        <div className="alert alert-info">No stock entries yet. Add one to get started.</div>
+        <div className="alert alert-info">{text.stock.empty}</div>
       ) : (
         <table className="table table-striped">
           <thead>
             <tr>
-              <th>Medicine</th>
-              <th>Date</th>
-              <th>Quantity</th>
-              <th>Type</th>
+              <th>{text.stock.medicine}</th>
+              <th>{text.stock.date}</th>
+              <th>{text.stock.quantity}</th>
+              <th>{text.stock.type}</th>
             </tr>
           </thead>
           <tbody>
@@ -64,9 +78,9 @@ function StockListContent() {
                 <td>
                   <Link to={`/stock/${item.id}`}>{item.medicineName}</Link>
                 </td>
-                <td>{formatDateTime(item.date)}</td>
+                <td>{formatDateTime(item.date, locale)}</td>
                 <td>{item.quantity}</td>
-                <td>{item.type}</td>
+                <td>{getStockEntryTypeLabel(item.type, text.stock.box, text.stock.manual)}</td>
               </tr>
             ))}
           </tbody>

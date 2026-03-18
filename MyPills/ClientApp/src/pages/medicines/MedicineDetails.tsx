@@ -2,7 +2,20 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from './medicinesApi'
+import { useLanguage } from '../../contexts/LanguageContext'
 import type { MedicineDetails, MedicineStockEntry } from '../../types/api'
+
+function getStockEntryTypeLabel(type: string, boxLabel: string, manualLabel: string) {
+  if (type === 'Box') {
+    return boxLabel
+  }
+
+  if (type === 'Manual') {
+    return manualLabel
+  }
+
+  return type
+}
 
 function MedicineDetailsContent() {
   const { id } = useParams()
@@ -10,29 +23,30 @@ function MedicineDetailsContent() {
   const [stockEntries, setStockEntries] = useState<MedicineStockEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { text, locale } = useLanguage()
 
   useEffect(() => {
     const load = async () => {
       try {
         const { response, data } = await requestJson<MedicineDetails>(`/api/medicines/${id}`)
         if (!response.ok) {
-          throw new Error('Failed to load medicine.')
+          throw new Error(text.medicines.failedDetails)
         }
 
         setMedicine(data)
         setStockEntries(data.stockEntries ?? [])
       } catch (err) {
-        setError(err.message ?? 'Failed to load medicine.')
+        setError((err as Error).message ?? text.medicines.failedDetails)
       } finally {
         setLoading(false)
       }
     }
 
     load()
-  }, [id])
+  }, [id, text.medicines.failedDetails])
 
   if (loading) {
-    return <div className="loading">Loading medicine...</div>
+    return <div className="loading">{text.medicines.loadingDetails}</div>
   }
 
   if (error) {
@@ -40,55 +54,55 @@ function MedicineDetailsContent() {
   }
 
   if (!medicine) {
-    return <div className="error">Medicine not found.</div>
+    return <div className="error">{text.medicines.notFound}</div>
   }
 
   return (
     <div className="container my-5">
       <h2 className="mb-4">
-        Medicine Details{' '}
+        {text.medicines.detailsTitle}{' '}
         <Link to={`/medicines/${id}/edit`}>
           <i className="fa-regular fa-pen-to-square"></i>
         </Link>
       </h2>
 
       <dl className="row mb-5">
-        <dt className="col-sm-2">Name</dt>
+        <dt className="col-sm-2">{text.medicines.name}</dt>
         <dd className="col-sm-10">{medicine.name}</dd>
-        <dt className="col-sm-2">Box Size</dt>
+        <dt className="col-sm-2">{text.medicines.boxSize}</dt>
         <dd className="col-sm-10">{medicine.boxSize}</dd>
-        <dt className="col-sm-2">Stock Quantity</dt>
+        <dt className="col-sm-2">{text.medicines.stockQuantity}</dt>
         <dd className="col-sm-10">{medicine.stockQuantity}</dd>
-        <dt className="col-sm-2">Stock Date</dt>
+        <dt className="col-sm-2">{text.medicines.stockDate}</dt>
         <dd className="col-sm-10">
-          {medicine.stockDate ? new Date(medicine.stockDate).toLocaleDateString() : 'N/A'}
+          {medicine.stockDate ? new Date(medicine.stockDate).toLocaleDateString(locale) : 'N/A'}
         </dd>
       </dl>
 
-      <h2 className="mb-4">Latest Stocks</h2>
+      <h2 className="mb-4">{text.medicines.latestStocks}</h2>
       <p>
         <Link className="btn btn-success" to={`/stock/new?medicineId=${id}`}>
-          <i className="fa-solid fa-plus"></i> <span>Add Stock Entry</span>
+          <i className="fa-solid fa-plus"></i> <span>{text.medicines.addStockEntry}</span>
         </Link>
       </p>
 
       {stockEntries.length === 0 ? (
-        <div className="alert alert-info">No stock entries yet.</div>
+        <div className="alert alert-info">{text.stock.empty}</div>
       ) : (
         <table className="table table-striped">
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Quantity</th>
-              <th>Type</th>
+              <th>{text.medicines.date}</th>
+              <th>{text.medicines.quantity}</th>
+              <th>{text.medicines.type}</th>
             </tr>
           </thead>
           <tbody>
             {stockEntries.map(item => (
               <tr key={item.id}>
-                <td>{new Date(item.date).toLocaleDateString()}</td>
+                <td>{new Date(item.date).toLocaleDateString(locale)}</td>
                 <td>{item.quantity}</td>
-                <td>{item.type}</td>
+                <td>{getStockEntryTypeLabel(item.type, text.stock.box, text.stock.manual)}</td>
               </tr>
             ))}
           </tbody>
@@ -96,7 +110,7 @@ function MedicineDetailsContent() {
       )}
 
       <div className="mt-3">
-        <Link to="/medicines" className="btn btn-secondary">Back to List</Link>
+        <Link to="/medicines" className="btn btn-secondary">{text.common.backToList}</Link>
       </div>
     </div>
   )

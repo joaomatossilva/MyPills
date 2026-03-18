@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { formatValidationError, requestJson } from '../../api/apiClient'
+import { useLanguage } from '../../contexts/LanguageContext'
 import type { PrescriptionDetails, ValidationErrorResponse } from '../../types/api'
 
 function PrescriptionEditContent() {
@@ -12,43 +13,44 @@ function PrescriptionEditContent() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const { text } = useLanguage()
 
   useEffect(() => {
     const load = async () => {
       try {
         const { response, data } = await requestJson<PrescriptionDetails>(`/api/prescriptions/${id}`)
         if (!response.ok) {
-          throw new Error('Failed to load prescription.')
+          throw new Error(text.prescriptions.failedDetails)
         }
 
         setDate(data.date ?? '')
         setExpiryDate(data.expiryDate ?? '')
       } catch (err) {
-        setError(err.message ?? 'Failed to load prescription.')
+        setError((err as Error).message ?? text.prescriptions.failedDetails)
       } finally {
         setLoading(false)
       }
     }
 
     load()
-  }, [id])
+  }, [id, text.prescriptions.failedDetails])
 
   const onSubmit = async event => {
     event.preventDefault()
     setError(null)
 
     if (!date) {
-      setError('Date is required.')
+      setError(text.prescriptions.validation.dateRequired)
       return
     }
 
     if (!expiryDate) {
-      setError('Expiry date is required.')
+      setError(text.prescriptions.validation.expiryDateRequired)
       return
     }
 
     if (expiryDate < date) {
-      setError('Expiry date cannot be before the prescription date.')
+      setError(text.prescriptions.validation.expiryDateBeforeDate)
       return
     }
 
@@ -69,14 +71,14 @@ function PrescriptionEditContent() {
 
       navigate(`/prescriptions/${id}`)
     } catch (err) {
-      setError(err.message ?? 'Failed to update prescription.')
+      setError((err as Error).message ?? text.prescriptions.failedUpdate)
     } finally {
       setSaving(false)
     }
   }
 
   if (loading) {
-    return <div className="loading">Loading prescription...</div>
+    return <div className="loading">{text.prescriptions.loadingDetails}</div>
   }
 
   if (error && !saving && !date && !expiryDate) {
@@ -85,7 +87,7 @@ function PrescriptionEditContent() {
 
   return (
     <div className="container my-5">
-      <h2 className="mb-4">Edit Prescription</h2>
+      <h2 className="mb-4">{text.prescriptions.editTitle}</h2>
       <div className="row">
         <div className="col-md-4">
           <form onSubmit={onSubmit}>
@@ -97,7 +99,7 @@ function PrescriptionEditContent() {
                 value={date}
                 onChange={event => setDate(event.target.value)}
               />
-              <label className="form-label">Date</label>
+              <label className="form-label">{text.prescriptions.date}</label>
             </div>
             <div className="form-floating mb-3">
               <input
@@ -106,16 +108,16 @@ function PrescriptionEditContent() {
                 value={expiryDate}
                 onChange={event => setExpiryDate(event.target.value)}
               />
-              <label className="form-label">Expiry Date</label>
+              <label className="form-label">{text.prescriptions.expiryDate}</label>
             </div>
             <div>
               <button className="btn btn-primary" type="submit" disabled={saving}>
-                {saving ? 'Saving...' : 'Save'}
+                {saving ? `${text.common.save}...` : text.common.save}
               </button>
             </div>
           </form>
           <div className="mt-3">
-            <Link to={`/prescriptions/${id}`} className="btn btn-secondary">Back to Details</Link>
+            <Link to={`/prescriptions/${id}`} className="btn btn-secondary">{text.common.backToDetails}</Link>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from '../../api/apiClient'
+import { useLanguage } from '../../contexts/LanguageContext'
 import { formatDateOnly } from '../../utils/dateFormatting'
 
 function PrescriptionDeleteContent() {
@@ -11,25 +12,26 @@ function PrescriptionDeleteContent() {
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState(null)
+  const { text, locale } = useLanguage()
 
   useEffect(() => {
     const load = async () => {
       try {
         const { response, data } = await requestJson(`/api/prescriptions/${id}`)
         if (!response.ok) {
-          throw new Error('Failed to load prescription.')
+          throw new Error(text.prescriptions.failedDetails)
         }
 
         setPrescription(data)
       } catch (err) {
-        setError(err.message ?? 'Failed to load prescription.')
+        setError((err as Error).message ?? text.prescriptions.failedDetails)
       } finally {
         setLoading(false)
       }
     }
 
     load()
-  }, [id])
+  }, [id, text.prescriptions.failedDetails])
 
   const onDelete = async event => {
     event.preventDefault()
@@ -42,19 +44,19 @@ function PrescriptionDeleteContent() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to delete prescription.')
+        throw new Error(text.prescriptions.failedDelete)
       }
 
       navigate('/prescriptions')
     } catch (err) {
-      setError(err.message ?? 'Failed to delete prescription.')
+      setError((err as Error).message ?? text.prescriptions.failedDelete)
     } finally {
       setDeleting(false)
     }
   }
 
   if (loading) {
-    return <div className="loading">Loading prescription...</div>
+    return <div className="loading">{text.prescriptions.loadingDelete}</div>
   }
 
   if (error && !prescription) {
@@ -62,31 +64,31 @@ function PrescriptionDeleteContent() {
   }
 
   if (!prescription) {
-    return <div className="error">Prescription not found.</div>
+    return <div className="error">{text.prescriptions.notFound}</div>
   }
 
   return (
     <div className="container my-5">
-      <h1>Delete</h1>
-      <h3>Are you sure you want to delete this?</h3>
+      <h1>{text.prescriptions.deleteTitle}</h1>
+      <h3>{text.prescriptions.deletePrompt}</h3>
       <div>
-        <h4>Prescription</h4>
+        <h4>{text.prescriptions.entityLabel}</h4>
         <hr />
         <dl className="row">
-          <dt className="col-sm-2">Date</dt>
-          <dd className="col-sm-10">{formatDateOnly(prescription.date)}</dd>
-          <dt className="col-sm-2">Expiry Date</dt>
-          <dd className="col-sm-10">{formatDateOnly(prescription.expiryDate)}</dd>
+          <dt className="col-sm-2">{text.prescriptions.date}</dt>
+          <dd className="col-sm-10">{formatDateOnly(prescription.date, locale)}</dd>
+          <dt className="col-sm-2">{text.prescriptions.expiryDate}</dt>
+          <dd className="col-sm-10">{formatDateOnly(prescription.expiryDate, locale)}</dd>
         </dl>
 
         {error && <div className="text-danger mb-3">{error}</div>}
 
         <form onSubmit={onDelete}>
           <button className="btn btn-danger" type="submit" disabled={deleting}>
-            {deleting ? 'Deleting...' : 'Delete'}
+            {deleting ? `${text.common.delete}...` : text.common.delete}
           </button>
           <span className="ms-2">
-            <Link to="/prescriptions">Back to List</Link>
+            <Link to="/prescriptions">{text.common.backToList}</Link>
           </span>
         </form>
       </div>

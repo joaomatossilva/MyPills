@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { formatValidationError, requestJson } from '../../api/apiClient'
+import { useLanguage } from '../../contexts/LanguageContext'
 import type { PrescriptionDetails, ValidationErrorResponse } from '../../types/api'
 
 function PrescriptionCreateContent() {
@@ -10,23 +11,24 @@ function PrescriptionCreateContent() {
   const [expiryDate, setExpiryDate] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const { text } = useLanguage()
 
   const onSubmit = async event => {
     event.preventDefault()
     setError(null)
 
     if (!date) {
-      setError('Date is required.')
+      setError(text.prescriptions.validation.dateRequired)
       return
     }
 
     if (!expiryDate) {
-      setError('Expiry date is required.')
+      setError(text.prescriptions.validation.expiryDateRequired)
       return
     }
 
     if (expiryDate < date) {
-      setError('Expiry date cannot be before the prescription date.')
+      setError(text.prescriptions.validation.expiryDateBeforeDate)
       return
     }
 
@@ -47,7 +49,7 @@ function PrescriptionCreateContent() {
 
       navigate(`/prescriptions/${data.id}`)
     } catch (err) {
-      setError(err.message ?? 'Failed to create prescription.')
+      setError((err as Error).message ?? text.prescriptions.failedCreate)
     } finally {
       setSaving(false)
     }
@@ -55,7 +57,7 @@ function PrescriptionCreateContent() {
 
   return (
     <div className="container my-5">
-      <h2 className="mb-4">Add Prescription</h2>
+      <h2 className="mb-4">{text.prescriptions.createTitle}</h2>
       <div className="row">
         <div className="col-md-4">
           <form onSubmit={onSubmit}>
@@ -67,7 +69,7 @@ function PrescriptionCreateContent() {
                 value={date}
                 onChange={event => setDate(event.target.value)}
               />
-              <label className="form-label">Date</label>
+              <label className="form-label">{text.prescriptions.date}</label>
             </div>
             <div className="form-floating mb-3">
               <input
@@ -76,16 +78,16 @@ function PrescriptionCreateContent() {
                 value={expiryDate}
                 onChange={event => setExpiryDate(event.target.value)}
               />
-              <label className="form-label">Expiry Date</label>
+              <label className="form-label">{text.prescriptions.expiryDate}</label>
             </div>
             <div>
               <button className="w-100 btn btn-lg btn-primary" type="submit" disabled={saving}>
-                {saving ? 'Creating...' : 'Create'}
+                {saving ? `${text.common.create}...` : text.common.create}
               </button>
             </div>
           </form>
           <div className="mt-3">
-            <Link to="/prescriptions" className="btn btn-secondary">Back to List</Link>
+            <Link to="/prescriptions" className="btn btn-secondary">{text.common.backToList}</Link>
           </div>
         </div>
       </div>

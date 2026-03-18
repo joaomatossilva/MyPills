@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { formatValidationError, requestJson } from '../../api/apiClient'
+import { useLanguage } from '../../contexts/LanguageContext'
 import type { MedicinesResponse, MedicineListItem, PrescriptionDetails, ValidationErrorResponse } from '../../types/api'
 
 function PrescriptionMedicineAddContent() {
@@ -14,6 +15,7 @@ function PrescriptionMedicineAddContent() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const { text } = useLanguage()
 
   useEffect(() => {
     const load = async () => {
@@ -24,25 +26,25 @@ function PrescriptionMedicineAddContent() {
         ])
 
         if (!medicinesResponse.ok) {
-          throw new Error('Failed to load medicines.')
+          throw new Error(text.medicines.failedList)
         }
 
         if (!prescriptionResponse.ok) {
-          throw new Error('Failed to load prescription.')
+          throw new Error(text.prescriptions.failedDetails)
         }
 
         const items = medicinesData?.medicines ?? []
         setMedicines(items)
         setMedicineId(items[0]?.id ?? '')
       } catch (err) {
-        setError(err.message ?? 'Failed to load form.')
+        setError((err as Error).message ?? text.common.loadingForm)
       } finally {
         setLoading(false)
       }
     }
 
     load()
-  }, [id])
+  }, [id, text.common.loadingForm, text.medicines.failedList, text.prescriptions.failedDetails])
 
   const onSubmit = async event => {
     event.preventDefault()
@@ -52,22 +54,22 @@ function PrescriptionMedicineAddContent() {
     const parsedConsumedQuantity = Number(consumedQuantity)
 
     if (!medicineId) {
-      setError('Medicine is required.')
+      setError(text.prescriptions.validation.medicineRequired)
       return
     }
 
     if (!Number.isInteger(parsedQuantity) || parsedQuantity <= 0) {
-      setError('Quantity must be a positive whole number.')
+      setError(text.prescriptions.validation.quantityPositive)
       return
     }
 
     if (!Number.isInteger(parsedConsumedQuantity) || parsedConsumedQuantity < 0) {
-      setError('Consumed quantity must be zero or a positive whole number.')
+      setError(text.prescriptions.validation.consumedNonNegative)
       return
     }
 
     if (parsedConsumedQuantity > parsedQuantity) {
-      setError('Consumed quantity cannot exceed quantity.')
+      setError(text.prescriptions.validation.consumedExceedsQuantity)
       return
     }
 
@@ -89,14 +91,14 @@ function PrescriptionMedicineAddContent() {
 
       navigate(`/prescriptions/${id}`)
     } catch (err) {
-      setError(err.message ?? 'Failed to add medicine to prescription.')
+      setError((err as Error).message ?? text.prescriptions.failedAddMedicine)
     } finally {
       setSaving(false)
     }
   }
 
   if (loading) {
-    return <div className="loading">Loading form...</div>
+    return <div className="loading">{text.common.loadingForm}</div>
   }
 
   if (error && medicines.length === 0) {
@@ -105,7 +107,7 @@ function PrescriptionMedicineAddContent() {
 
   return (
     <div className="container my-5">
-      <h2 className="mb-4">Add Medicine to Prescription</h2>
+      <h2 className="mb-4">{text.prescriptions.addMedicineTitle}</h2>
       <div className="row">
         <div className="col-md-4">
           <form onSubmit={onSubmit}>
@@ -122,7 +124,7 @@ function PrescriptionMedicineAddContent() {
                   </option>
                 ))}
               </select>
-              <label className="form-label">Medicine</label>
+              <label className="form-label">{text.prescriptions.medicine}</label>
             </div>
             <div className="form-floating mb-3">
               <input
@@ -132,7 +134,7 @@ function PrescriptionMedicineAddContent() {
                 value={quantity}
                 onChange={event => setQuantity(event.target.value)}
               />
-              <label className="form-label">Quantity</label>
+              <label className="form-label">{text.prescriptions.quantity}</label>
             </div>
             <div className="form-floating mb-3">
               <input
@@ -142,16 +144,16 @@ function PrescriptionMedicineAddContent() {
                 value={consumedQuantity}
                 onChange={event => setConsumedQuantity(event.target.value)}
               />
-              <label className="form-label">Consumed Quantity</label>
+              <label className="form-label">{text.prescriptions.consumedQuantity}</label>
             </div>
             <div>
               <button className="btn btn-primary" type="submit" disabled={saving}>
-                {saving ? 'Saving...' : 'Add Medicine'}
+                {saving ? `${text.common.save}...` : text.prescriptions.addMedicine}
               </button>
             </div>
           </form>
           <div className="mt-3">
-            <Link to={`/prescriptions/${id}`} className="btn btn-secondary">Back to Details</Link>
+            <Link to={`/prescriptions/${id}`} className="btn btn-secondary">{text.common.backToDetails}</Link>
           </div>
         </div>
       </div>

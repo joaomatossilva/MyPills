@@ -1,31 +1,29 @@
 import ProtectedRoute from '../components/ProtectedRoute'
 import { useAuth } from '../contexts/AuthContext'
+import { useLanguage } from '../contexts/LanguageContext'
 
 function TestContent() {
   const { username } = useAuth()
+  const { text } = useLanguage()
 
   return (
     <div>
-      <h1>Test Page</h1>
+      <h1>{text.test.title}</h1>
       <div className="success">
-        <p>🎉 Success! You have accessed a protected page.</p>
-        <p>You are authenticated as <strong>{username}</strong></p>
+        <p>{text.test.successTitle}</p>
+        <p>{text.test.authenticatedAs(username)}</p>
       </div>
 
       <div style={{ marginTop: '2rem' }}>
-        <h2>Protected Content</h2>
-        <p>
-          This page is only accessible to authenticated users. If you weren't logged in,
-          you would have been redirected to the login page.
-        </p>
+        <h2>{text.test.protectedContent}</h2>
+        <p>{text.test.protectedDescription}</p>
         
         <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#f0f0f0', borderRadius: '4px' }}>
-          <h3>Technical Details</h3>
+          <h3>{text.test.technicalDetails}</h3>
           <ul>
-            <li>Authentication is handled via ASP.NET Core Identity cookies</li>
-            <li>The ProtectedRoute component checks authentication status</li>
-            <li>Unauthenticated users are redirected to /Identity/Account/Login</li>
-            <li>After login, you can navigate back to this page</li>
+            {text.test.details.map(item => (
+              <li key={item}>{item}</li>
+            ))}
           </ul>
         </div>
       </div>

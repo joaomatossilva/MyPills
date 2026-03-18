@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useLanguage } from '../contexts/LanguageContext'
 
 export default function Splash() {
   const { isAuthenticated, loading } = useAuth()
+  const { language, setLanguage, text, availableLanguages } = useLanguage()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -13,7 +15,7 @@ export default function Splash() {
   }, [isAuthenticated, loading, navigate])
 
   if (loading) {
-    return <div className="loading">Loading...</div>
+    return <div className="loading">{text.common.loading}</div>
   }
 
   return (
@@ -21,7 +23,22 @@ export default function Splash() {
       <nav className="splash-nav">
         <div className="splash-container">
           <span className="splash-brand">💊 My Pills</span>
-          <a className="splash-button-outline" href="/Identity/Account/Login">Sign In</a>
+          <div className="d-flex align-items-center gap-2 flex-wrap">
+            <label className="app-language-label" htmlFor="splash-language-select">{text.layout.languageLabel}</label>
+            <select
+              id="splash-language-select"
+              className="form-select form-select-sm app-language-select"
+              value={language}
+              onChange={event => setLanguage(event.target.value as typeof language)}
+            >
+              {availableLanguages.map(option => (
+                <option key={option.code} value={option.code}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <a className="splash-button-outline" href="/Identity/Account/Login">{text.splash.signIn}</a>
+          </div>
         </div>
       </nav>
 
@@ -29,20 +46,20 @@ export default function Splash() {
         <div className="splash-container splash-hero-content">
           <div className="splash-hero-text">
             <h1 className="splash-title">
-              Your Home Pharmacy, <span className="splash-title-accent">Organized.</span>
+              {text.splash.titleStart} <span className="splash-title-accent">{text.splash.titleAccent}</span>
             </h1>
             <p className="splash-lead">
-              Stop guessing how many pills are left in the bottle. My Pills monitors your home stock and reminds you to renew prescriptions before they expire.
+              {text.splash.lead}
             </p>
-            <a className="splash-button-primary" href="/Identity/Account/Register">Get Started Free</a>
+            <a className="splash-button-primary" href="/Identity/Account/Register">{text.splash.getStarted}</a>
           </div>
           <div className="splash-mockup">
             <div className="splash-mockup-card">
-              <h2>Live Inventory</h2>
+              <h2>{text.splash.liveInventory}</h2>
               <hr />
-              <p>Aspirin: 12 Units Left</p>
-              <p>Vitamin D3: 5 Units Left (Refill Soon!)</p>
-              <span className="splash-badge-warning">1 Prescription Expiring Soon</span>
+              <p>{text.splash.inventoryAspirin}</p>
+              <p>{text.splash.inventoryVitaminD}</p>
+              <span className="splash-badge-warning">{text.splash.expiringSoon}</span>
             </div>
           </div>
         </div>
@@ -52,24 +69,24 @@ export default function Splash() {
         <div className="splash-container splash-features-grid">
           <div className="splash-feature">
             <div className="splash-feature-icon">📦</div>
-            <h3>Stock Tracking</h3>
-            <p>Log your current bottle count and let our algorithm subtract doses automatically based on your schedule.</p>
+            <h3>{text.splash.stockTracking}</h3>
+            <p>{text.splash.stockTrackingDescription}</p>
           </div>
           <div className="splash-feature">
             <div className="splash-feature-icon">📄</div>
-            <h3>Prescription Vault</h3>
-            <p>Store photos of your prescriptions. Get alerts when they are about to expire or run out of refills.</p>
+            <h3>{text.splash.prescriptionVault}</h3>
+            <p>{text.splash.prescriptionVaultDescription}</p>
           </div>
           <div className="splash-feature">
             <div className="splash-feature-icon">🔔</div>
-            <h3>Smart Alerts</h3>
-            <p>Receive a notification when it's time to visit the pharmacy, not when you've already run out.</p>
+            <h3>{text.splash.smartAlerts}</h3>
+            <p>{text.splash.smartAlertsDescription}</p>
           </div>
         </div>
       </section>
 
       <footer className="splash-footer">
-        <p>&copy; 2026 My Pills. All rights reserved.</p>
+        <p>{text.splash.footer}</p>
       </footer>
     </div>
   )

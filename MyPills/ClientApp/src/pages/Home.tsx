@@ -1,32 +1,30 @@
 import { useAuth } from '../contexts/AuthContext'
+import { useLanguage } from '../contexts/LanguageContext'
 
 export default function Home() {
   const { isAuthenticated, username } = useAuth()
+  const { text } = useLanguage()
 
   return (
     <div>
-      <h1>Welcome to MyPills</h1>
-      <p>This is the home page and is accessible to everyone.</p>
+      <h1>{text.home.title}</h1>
+      <p>{text.home.subtitle}</p>
       
       {isAuthenticated ? (
         <div className="success">
-          <p>You are logged in as <strong>{username}</strong></p>
-          <p>You can now access protected pages like the Test page.</p>
+          <p>{text.home.loggedIn(username)}</p>
+          <p>{text.home.loggedInHint}</p>
         </div>
       ) : (
         <div className="error">
-          <p>You are not logged in.</p>
-          <p>Click the Login button in the navigation to authenticate.</p>
+          <p>{text.home.notLoggedIn}</p>
+          <p>{text.home.notLoggedInHint}</p>
         </div>
       )}
 
       <div style={{ marginTop: '2rem' }}>
-        <h2>About This Page</h2>
-        <p>
-          This is a React SPA (Single Page Application) integrated with ASP.NET Core.
-          Authentication is handled via cookies, so when you log in through the Identity pages,
-          your session is maintained across the entire application.
-        </p>
+        <h2>{text.home.aboutTitle}</h2>
+        <p>{text.home.aboutDescription}</p>
       </div>
     </div>
   )

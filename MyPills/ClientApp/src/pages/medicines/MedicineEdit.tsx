@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson, formatValidationError } from './medicinesApi'
+import { useLanguage } from '../../contexts/LanguageContext'
 import type { MedicineDetails, ValidationErrorResponse } from '../../types/api'
 
 function MedicineEditContent() {
@@ -12,26 +13,27 @@ function MedicineEditContent() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const { text } = useLanguage()
 
   useEffect(() => {
     const load = async () => {
       try {
         const { response, data } = await requestJson<MedicineDetails>(`/api/medicines/${id}`)
         if (!response.ok) {
-          throw new Error('Failed to load medicine.')
+          throw new Error(text.medicines.failedDetails)
         }
 
         setName(data.name ?? '')
         setBoxSize(String(data.boxSize ?? ''))
       } catch (err) {
-        setError(err.message ?? 'Failed to load medicine.')
+        setError((err as Error).message ?? text.medicines.failedDetails)
       } finally {
         setLoading(false)
       }
     }
 
     load()
-  }, [id])
+  }, [id, text.medicines.failedDetails])
 
   const onSubmit = async event => {
     event.preventDefault()
@@ -41,12 +43,12 @@ function MedicineEditContent() {
     const parsedBoxSize = Number(boxSize)
 
     if (!trimmedName) {
-      setError('Name is required.')
+      setError(text.medicines.validation.nameRequired)
       return
     }
 
     if (!Number.isInteger(parsedBoxSize) || parsedBoxSize <= 0) {
-      setError('Box size must be a positive whole number.')
+      setError(text.medicines.validation.boxSizePositive)
       return
     }
 
@@ -67,14 +69,14 @@ function MedicineEditContent() {
 
       navigate(`/medicines/${id}`)
     } catch (err) {
-      setError(err.message ?? 'Failed to update medicine.')
+      setError((err as Error).message ?? text.medicines.failedUpdate)
     } finally {
       setSaving(false)
     }
   }
 
   if (loading) {
-    return <div className="loading">Loading medicine...</div>
+    return <div className="loading">{text.medicines.loadingDetails}</div>
   }
 
   if (error) {
@@ -83,7 +85,7 @@ function MedicineEditContent() {
 
   return (
     <div className="container my-5">
-      <h2 className="mb-4">Edit Medicine</h2>
+      <h2 className="mb-4">{text.medicines.editTitle}</h2>
       <div className="row">
         <div className="col-md-4">
           <form onSubmit={onSubmit}>
@@ -95,7 +97,7 @@ function MedicineEditContent() {
                 onChange={event => setName(event.target.value)}
                 placeholder="Name"
               />
-              <label className="form-label">Name</label>
+              <label className="form-label">{text.medicines.name}</label>
             </div>
             <div className="form-floating mb-3">
               <input
@@ -106,16 +108,16 @@ function MedicineEditContent() {
                 onChange={event => setBoxSize(event.target.value)}
                 placeholder="Box Size"
               />
-              <label className="form-label">Box Size</label>
+              <label className="form-label">{text.medicines.boxSize}</label>
             </div>
             <div>
               <button className="btn btn-primary" type="submit" disabled={saving}>
-                {saving ? 'Saving...' : 'Save'}
+                {saving ? `${text.common.save}...` : text.common.save}
               </button>
             </div>
           </form>
           <div className="mt-3">
-            <Link to={`/medicines/${id}`} className="btn btn-secondary">Back to Details</Link>
+            <Link to={`/medicines/${id}`} className="btn btn-secondary">{text.common.backToDetails}</Link>
           </div>
         </div>
       </div>

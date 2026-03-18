@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson, formatValidationError } from './medicinesApi'
+import { useLanguage } from '../../contexts/LanguageContext'
 import type { MedicineDetails, ValidationErrorResponse } from '../../types/api'
 
 function MedicineCreateContent() {
@@ -10,6 +11,7 @@ function MedicineCreateContent() {
   const [boxSize, setBoxSize] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const { text } = useLanguage()
 
   const onSubmit = async event => {
     event.preventDefault()
@@ -19,12 +21,12 @@ function MedicineCreateContent() {
     const parsedBoxSize = Number(boxSize)
 
     if (!trimmedName) {
-      setError('Name is required.')
+      setError(text.medicines.validation.nameRequired)
       return
     }
 
     if (!Number.isInteger(parsedBoxSize) || parsedBoxSize <= 0) {
-      setError('Box size must be a positive whole number.')
+      setError(text.medicines.validation.boxSizePositive)
       return
     }
 
@@ -45,7 +47,7 @@ function MedicineCreateContent() {
 
       navigate(`/medicines/${data.id}`)
     } catch (err) {
-      setError(err.message ?? 'Failed to create medicine.')
+      setError((err as Error).message ?? text.medicines.failedCreate)
     } finally {
       setSaving(false)
     }
@@ -53,7 +55,7 @@ function MedicineCreateContent() {
 
   return (
     <div className="container my-5">
-      <h2 className="mb-4">Add New Medicine</h2>
+      <h2 className="mb-4">{text.medicines.createTitle}</h2>
       <div className="row">
         <div className="col-md-4">
           <form onSubmit={onSubmit}>
@@ -65,7 +67,7 @@ function MedicineCreateContent() {
                 onChange={event => setName(event.target.value)}
                 placeholder="Name"
               />
-              <label className="form-label">Name</label>
+              <label className="form-label">{text.medicines.name}</label>
             </div>
             <div className="form-floating mb-3">
               <input
@@ -76,16 +78,16 @@ function MedicineCreateContent() {
                 onChange={event => setBoxSize(event.target.value)}
                 placeholder="Box Size"
               />
-              <label className="form-label">Box Size</label>
+              <label className="form-label">{text.medicines.boxSize}</label>
             </div>
             <div>
               <button className="w-100 btn btn-lg btn-primary" type="submit" disabled={saving}>
-                {saving ? 'Creating...' : 'Create'}
+                {saving ? `${text.common.create}...` : text.common.create}
               </button>
             </div>
           </form>
           <div className="mt-3">
-            <Link to="/medicines" className="btn btn-secondary">Back to List</Link>
+            <Link to="/medicines" className="btn btn-secondary">{text.common.backToList}</Link>
           </div>
         </div>
       </div>

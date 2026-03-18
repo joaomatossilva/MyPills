@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { formatValidationError, requestJson } from '../../api/apiClient'
+import { useLanguage } from '../../contexts/LanguageContext'
 import { formatDateOnly } from '../../utils/dateFormatting'
 import type { StockDeductionPrescriptionItem, StockDeductionPreviewResponse, ValidationErrorResponse } from '../../types/api'
 
@@ -14,11 +15,12 @@ function StockPrescriptionDeductionContent() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const { text, locale } = useLanguage()
 
   useEffect(() => {
     const load = async () => {
       if (!medicineId || !boxes) {
-        setError('Medicine and box count are required.')
+        setError(text.stock.noMedicineAndBoxes)
         setLoading(false)
         return
       }
@@ -26,7 +28,7 @@ function StockPrescriptionDeductionContent() {
       try {
         const { response, data } = await requestJson<StockDeductionPreviewResponse>(`/api/stock/prescription-deductions?medicineId=${medicineId}&boxes=${boxes}`)
         if (!response.ok) {
-          throw new Error('Failed to load prescription deductions.')
+          throw new Error(text.stock.failedLoadDeductions)
         }
 
         const items = data?.prescriptions ?? []
@@ -37,14 +39,14 @@ function StockPrescriptionDeductionContent() {
 
         setPrescriptions(items)
       } catch (err) {
-        setError(err.message ?? 'Failed to load prescription deductions.')
+        setError((err as Error).message ?? text.stock.failedLoadDeductions)
       } finally {
         setLoading(false)
       }
     }
 
     load()
-  }, [boxes, medicineId, navigate])
+  }, [boxes, medicineId, navigate, text.stock.failedLoadDeductions, text.stock.noMedicineAndBoxes])
 
   const updateQuantity = (prescriptionId, quantity) => {
     setPrescriptions(currentItems =>
@@ -64,7 +66,7 @@ function StockPrescriptionDeductionContent() {
     for (const item of prescriptions) {
       const parsedQuantity = Number(item.quantity)
       if (!Number.isInteger(parsedQuantity) || parsedQuantity < 0) {
-        setError('Each deduction quantity must be zero or a positive whole number.')
+        setError(text.stock.validation.deductionQuantityNonNegative)
         return
       }
 
@@ -91,14 +93,14 @@ function StockPrescriptionDeductionContent() {
 
       navigate('/overview')
     } catch (err) {
-      setError(err.message ?? 'Failed to apply prescription deductions.')
+      setError((err as Error).message ?? text.stock.failedApplyDeductions)
     } finally {
       setSaving(false)
     }
   }
 
   if (loading) {
-    return <div className="loading">Loading prescription deductions...</div>
+    return <div className="loading">{text.stock.loadingDeductions}</div>
   }
 
   if (error && prescriptions.length === 0) {
@@ -107,7 +109,7 @@ function StockPrescriptionDeductionContent() {
 
   return (
     <div className="container my-5">
-      <h2 className="mb-4">Prescription Deductions</h2>
+      <h2 className="mb-4">{text.stock.deductionsTitle}</h2>
       <div className="row">
         <div className="col-md-5">
           <form onSubmit={onSubmit}>
@@ -122,19 +124,19 @@ function StockPrescriptionDeductionContent() {
                   onChange={event => updateQuantity(item.prescriptionId, event.target.value)}
                 />
                 <label className="form-label">
-                  {formatDateOnly(item.date)} ({item.available} Available)
+                  {formatDateOnly(item.date, locale)} ({item.available} {text.stock.availableSuffix})
                 </label>
               </div>
             ))}
             <div className="form-floating">
               <button className="w-100 btn btn-lg btn-primary" type="submit" disabled={saving}>
-                {saving ? 'Saving...' : 'Submit'}
+                {saving ? `${text.common.save}...` : text.common.submit}
               </button>
             </div>
           </form>
 
           <div className="mt-3">
-            <Link to="/overview" className="btn btn-secondary">Back to Overview</Link>
+            <Link to="/overview" className="btn btn-secondary">{text.common.backToOverview}</Link>
           </div>
         </div>
       </div>

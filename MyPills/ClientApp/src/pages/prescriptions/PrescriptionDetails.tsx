@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from '../../api/apiClient'
+import { useLanguage } from '../../contexts/LanguageContext'
 import { formatDateOnly } from '../../utils/dateFormatting'
 
 function PrescriptionDetailsContent() {
@@ -9,28 +10,29 @@ function PrescriptionDetailsContent() {
   const [prescription, setPrescription] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { text, locale } = useLanguage()
 
   useEffect(() => {
     const load = async () => {
       try {
         const { response, data } = await requestJson(`/api/prescriptions/${id}`)
         if (!response.ok) {
-          throw new Error('Failed to load prescription.')
+          throw new Error(text.prescriptions.failedDetails)
         }
 
         setPrescription(data)
       } catch (err) {
-        setError(err.message ?? 'Failed to load prescription.')
+        setError((err as Error).message ?? text.prescriptions.failedDetails)
       } finally {
         setLoading(false)
       }
     }
 
     load()
-  }, [id])
+  }, [id, text.prescriptions.failedDetails])
 
   if (loading) {
-    return <div className="loading">Loading prescription...</div>
+    return <div className="loading">{text.prescriptions.loadingDetails}</div>
   }
 
   if (error) {
@@ -38,29 +40,29 @@ function PrescriptionDetailsContent() {
   }
 
   if (!prescription) {
-    return <div className="error">Prescription not found.</div>
+    return <div className="error">{text.prescriptions.notFound}</div>
   }
 
   return (
     <div className="container my-5">
       <h2 className="mb-4">
-        Prescription Details{' '}
+        {text.prescriptions.detailsTitle}{' '}
         <Link to={`/prescriptions/${id}/edit`}>
           <i className="fa-regular fa-pen-to-square"></i>
         </Link>
       </h2>
 
       <dl className="row mb-5">
-        <dt className="col-sm-2">Date</dt>
-        <dd className="col-sm-10">{formatDateOnly(prescription.date)}</dd>
-        <dt className="col-sm-2">Expiry Date</dt>
-        <dd className="col-sm-10">{formatDateOnly(prescription.expiryDate)}</dd>
+        <dt className="col-sm-2">{text.prescriptions.date}</dt>
+        <dd className="col-sm-10">{formatDateOnly(prescription.date, locale)}</dd>
+        <dt className="col-sm-2">{text.prescriptions.expiryDate}</dt>
+        <dd className="col-sm-10">{formatDateOnly(prescription.expiryDate, locale)}</dd>
       </dl>
 
-      <h2 className="mb-4">Medicines</h2>
+      <h2 className="mb-4">{text.prescriptions.medicinesSection}</h2>
       <p>
         <Link to={`/prescriptions/${id}/medicines/add`} className="btn btn-success">
-          <i className="fa-solid fa-plus"></i> <span>Add Medicine</span>
+          <i className="fa-solid fa-plus"></i> <span>{text.prescriptions.addMedicine}</span>
         </Link>
       </p>
 
@@ -68,9 +70,9 @@ function PrescriptionDetailsContent() {
         <table className="table table-striped">
           <thead>
             <tr>
-              <th>Medicine</th>
-              <th>Quantity</th>
-              <th>Consumed Quantity</th>
+              <th>{text.prescriptions.medicine}</th>
+              <th>{text.prescriptions.quantity}</th>
+              <th>{text.prescriptions.consumedQuantity}</th>
               <th></th>
             </tr>
           </thead>
@@ -82,10 +84,10 @@ function PrescriptionDetailsContent() {
                 <td>{item.consumedQuantity}</td>
                 <td className="text-end">
                   <Link to={`/prescriptions/${id}/medicines/${item.medicineId}/edit`} className="me-3">
-                    Edit
+                    {text.common.edit}
                   </Link>
                   <Link to={`/prescriptions/${id}/medicines/${item.medicineId}/delete`} className="link-danger">
-                    Delete
+                    {text.common.delete}
                   </Link>
                 </td>
               </tr>
@@ -93,11 +95,11 @@ function PrescriptionDetailsContent() {
           </tbody>
         </table>
       ) : (
-        <div className="alert alert-info">No medicines added to this prescription yet.</div>
+        <div className="alert alert-info">{text.prescriptions.noMedicines}</div>
       )}
 
       <div className="mt-3">
-        <Link to="/prescriptions" className="btn btn-secondary">Back to List</Link>
+        <Link to="/prescriptions" className="btn btn-secondary">{text.common.backToList}</Link>
       </div>
     </div>
   )

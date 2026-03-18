@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { formatValidationError, requestJson } from '../../api/apiClient'
+import { useLanguage } from '../../contexts/LanguageContext'
 import type { PrescriptionDetails, PrescriptionMedicineItem, ValidationErrorResponse } from '../../types/api'
 
 function PrescriptionMedicineEditContent() {
@@ -13,32 +14,33 @@ function PrescriptionMedicineEditContent() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const { text } = useLanguage()
 
   useEffect(() => {
     const load = async () => {
       try {
         const { response, data } = await requestJson<PrescriptionDetails>(`/api/prescriptions/${id}`)
         if (!response.ok) {
-          throw new Error('Failed to load prescription.')
+          throw new Error(text.prescriptions.failedDetails)
         }
 
         const selectedMedicine = data?.medicines?.find(item => item.medicineId === medicineId)
         if (!selectedMedicine) {
-          throw new Error('Prescription medicine not found.')
+          throw new Error(text.prescriptions.medicineNotFound)
         }
 
         setMedicine(selectedMedicine)
         setQuantity(String(selectedMedicine.quantity))
         setConsumedQuantity(String(selectedMedicine.consumedQuantity))
       } catch (err) {
-        setError(err.message ?? 'Failed to load prescription medicine.')
+        setError((err as Error).message ?? text.prescriptions.failedLoadMedicine)
       } finally {
         setLoading(false)
       }
     }
 
     load()
-  }, [id, medicineId])
+  }, [id, medicineId, text.prescriptions.failedDetails, text.prescriptions.failedLoadMedicine, text.prescriptions.medicineNotFound])
 
   const onSubmit = async event => {
     event.preventDefault()
@@ -48,17 +50,17 @@ function PrescriptionMedicineEditContent() {
     const parsedConsumedQuantity = Number(consumedQuantity)
 
     if (!Number.isInteger(parsedQuantity) || parsedQuantity <= 0) {
-      setError('Quantity must be a positive whole number.')
+      setError(text.prescriptions.validation.quantityPositive)
       return
     }
 
     if (!Number.isInteger(parsedConsumedQuantity) || parsedConsumedQuantity < 0) {
-      setError('Consumed quantity must be zero or a positive whole number.')
+      setError(text.prescriptions.validation.consumedNonNegative)
       return
     }
 
     if (parsedConsumedQuantity > parsedQuantity) {
-      setError('Consumed quantity cannot exceed quantity.')
+      setError(text.prescriptions.validation.consumedExceedsQuantity)
       return
     }
 
@@ -79,14 +81,14 @@ function PrescriptionMedicineEditContent() {
 
       navigate(`/prescriptions/${id}`)
     } catch (err) {
-      setError(err.message ?? 'Failed to update prescription medicine.')
+      setError((err as Error).message ?? text.prescriptions.failedUpdateMedicine)
     } finally {
       setSaving(false)
     }
   }
 
   if (loading) {
-    return <div className="loading">Loading prescription medicine...</div>
+    return <div className="loading">{text.prescriptions.loadingMedicine}</div>
   }
 
   if (error && !medicine) {
@@ -95,14 +97,14 @@ function PrescriptionMedicineEditContent() {
 
   return (
     <div className="container my-5">
-      <h2 className="mb-4">Edit Prescription Medicine</h2>
+      <h2 className="mb-4">{text.prescriptions.editMedicineTitle}</h2>
       <div className="row">
         <div className="col-md-4">
           <form onSubmit={onSubmit}>
             {error && <div className="text-danger mb-3">{error}</div>}
             <div className="form-floating mb-3">
               <input className="form-control" value={medicine?.medicineName ?? ''} disabled />
-              <label className="form-label">Medicine</label>
+               <label className="form-label">{text.prescriptions.medicine}</label>
             </div>
             <div className="form-floating mb-3">
               <input
@@ -112,7 +114,7 @@ function PrescriptionMedicineEditContent() {
                 value={quantity}
                 onChange={event => setQuantity(event.target.value)}
               />
-              <label className="form-label">Quantity</label>
+               <label className="form-label">{text.prescriptions.quantity}</label>
             </div>
             <div className="form-floating mb-3">
               <input
@@ -122,16 +124,16 @@ function PrescriptionMedicineEditContent() {
                 value={consumedQuantity}
                 onChange={event => setConsumedQuantity(event.target.value)}
               />
-              <label className="form-label">Consumed Quantity</label>
+               <label className="form-label">{text.prescriptions.consumedQuantity}</label>
             </div>
             <div>
               <button className="btn btn-primary" type="submit" disabled={saving}>
-                {saving ? 'Saving...' : 'Save'}
+                {saving ? `${text.common.save}...` : text.common.save}
               </button>
             </div>
           </form>
           <div className="mt-3">
-            <Link to={`/prescriptions/${id}`} className="btn btn-secondary">Back to Details</Link>
+            <Link to={`/prescriptions/${id}`} className="btn btn-secondary">{text.common.backToDetails}</Link>
           </div>
         </div>
       </div>

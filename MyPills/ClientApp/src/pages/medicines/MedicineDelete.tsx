@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from './medicinesApi'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 function MedicineDeleteContent() {
   const { id } = useParams()
@@ -10,25 +11,26 @@ function MedicineDeleteContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [deleting, setDeleting] = useState(false)
+  const { text } = useLanguage()
 
   useEffect(() => {
     const load = async () => {
       try {
         const { response, data } = await requestJson(`/api/medicines/${id}`)
         if (!response.ok) {
-          throw new Error('Failed to load medicine.')
+          throw new Error(text.medicines.failedDetails)
         }
 
         setMedicine(data)
       } catch (err) {
-        setError(err.message ?? 'Failed to load medicine.')
+        setError((err as Error).message ?? text.medicines.failedDetails)
       } finally {
         setLoading(false)
       }
     }
 
     load()
-  }, [id])
+  }, [id, text.medicines.failedDetails])
 
   const onDelete = async event => {
     event.preventDefault()
@@ -41,19 +43,19 @@ function MedicineDeleteContent() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to delete medicine.')
+        throw new Error(text.medicines.failedDelete)
       }
 
       navigate('/medicines')
     } catch (err) {
-      setError(err.message ?? 'Failed to delete medicine.')
+      setError((err as Error).message ?? text.medicines.failedDelete)
     } finally {
       setDeleting(false)
     }
   }
 
   if (loading) {
-    return <div className="loading">Loading medicine...</div>
+    return <div className="loading">{text.medicines.loadingDelete}</div>
   }
 
   if (error) {
@@ -61,20 +63,20 @@ function MedicineDeleteContent() {
   }
 
   if (!medicine) {
-    return <div className="error">Medicine not found.</div>
+    return <div className="error">{text.medicines.notFound}</div>
   }
 
   return (
     <div className="container my-5">
-      <h1>Delete</h1>
-      <h3>Are you sure you want to delete this?</h3>
+      <h1>{text.common.delete}</h1>
+      <h3>{text.medicines.deletePrompt}</h3>
       <div>
-        <h4>Medicine</h4>
+        <h4>{text.medicines.entityLabel}</h4>
         <hr />
         <dl className="row">
-          <dt className="col-sm-2">Name</dt>
+          <dt className="col-sm-2">{text.medicines.name}</dt>
           <dd className="col-sm-10">{medicine.name}</dd>
-          <dt className="col-sm-2">Box Size</dt>
+          <dt className="col-sm-2">{text.medicines.boxSize}</dt>
           <dd className="col-sm-10">{medicine.boxSize}</dd>
         </dl>
 
@@ -82,10 +84,10 @@ function MedicineDeleteContent() {
 
         <form onSubmit={onDelete}>
           <button className="btn btn-danger" type="submit" disabled={deleting}>
-            {deleting ? 'Deleting...' : 'Delete'}
+            {deleting ? `${text.common.delete}...` : text.common.delete}
           </button>
           <span className="ms-2">
-            <Link to="/medicines">Back to List</Link>
+            <Link to="/medicines">{text.common.backToList}</Link>
           </span>
         </form>
       </div>

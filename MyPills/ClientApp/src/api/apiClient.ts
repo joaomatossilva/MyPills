@@ -1,4 +1,6 @@
-export async function requestJson(url, options = {}) {
+import type { RequestJsonResult, ValidationErrorResponse } from '../types/api'
+
+export async function requestJson<T>(url: string, options: RequestInit = {}): Promise<RequestJsonResult<T>> {
   const response = await fetch(url, {
     credentials: 'include',
     headers: {
@@ -14,12 +16,12 @@ export async function requestJson(url, options = {}) {
   }
 
   const contentType = response.headers.get('content-type') ?? ''
-  const data = contentType.includes('application/json') ? await response.json() : null
+  const data = contentType.includes('application/json') ? await response.json() as T : null
 
   return { response, data }
 }
 
-export function formatValidationError(data) {
+export function formatValidationError(data: ValidationErrorResponse | null): string {
   if (!data || typeof data !== 'object') {
     return 'Request failed.'
   }

@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { formatValidationError, requestJson } from '../../api/apiClient'
+import type { CreateStockEntryResponse, MedicinesResponse, MedicineListItem, ValidationErrorResponse } from '../../types/api'
 
-function PrescriptionMedicineAddContent() {
-  const { id } = useParams()
+function StockCreateContent() {
   const navigate = useNavigate()
-  const [medicines, setMedicines] = useState([])
-  const [medicineId, setMedicineId] = useState('')
+  const [searchParams] = useSearchParams()
+  const [medicines, setMedicines] = useState<MedicineListItem[]>([])
+  const [medicineId, setMedicineId] = useState(searchParams.get('medicineId') ?? '')
   const [quantity, setQuantity] = useState('1')
-  const [consumedQuantity, setConsumedQuantity] = useState('0')
+  const [type, setType] = useState('1')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
@@ -17,22 +18,14 @@ function PrescriptionMedicineAddContent() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [{ response: medicinesResponse, data: medicinesData }, { response: prescriptionResponse }] = await Promise.all([
-          requestJson('/api/medicines'),
-          requestJson(`/api/prescriptions/${id}`)
-        ])
-
-        if (!medicinesResponse.ok) {
+        const { response, data } = await requestJson<MedicinesResponse>('/api/medicines')
+        if (!response.ok) {
           throw new Error('Failed to load medicines.')
         }
 
-        if (!prescriptionResponse.ok) {
-          throw new Error('Failed to load prescription.')
-        }
-
-        const items = medicinesData?.medicines ?? []
+        const items = data?.medicines ?? []
         setMedicines(items)
-        setMedicineId(items[0]?.id ?? '')
+        setMedicineId(currentMedicineId => currentMedicineId || items[0]?.id || '')
       } catch (err) {
         setError(err.message ?? 'Failed to load form.')
       } finally {
@@ -41,14 +34,14 @@ function PrescriptionMedicineAddContent() {
     }
 
     load()
-  }, [id])
+  }, [])
 
   const onSubmit = async event => {
     event.preventDefault()
     setError(null)
 
     const parsedQuantity = Number(quantity)
-    const parsedConsumedQuantity = Number(consumedQuantity)
+    const parsedType = Number(type)
 
     if (!medicineId) {
       setError('Medicine is required.')
@@ -60,35 +53,35 @@ function PrescriptionMedicineAddContent() {
       return
     }
 
-    if (!Number.isInteger(parsedConsumedQuantity) || parsedConsumedQuantity < 0) {
-      setError('Consumed quantity must be zero or a positive whole number.')
-      return
-    }
-
-    if (parsedConsumedQuantity > parsedQuantity) {
-      setError('Consumed quantity cannot exceed quantity.')
+    if (![1, 2].includes(parsedType)) {
+      setError('Type is required.')
       return
     }
 
     setSaving(true)
     try {
-      const { response, data } = await requestJson(`/api/prescriptions/${id}/medicines`, {
+      const { response, data } = await requestJson<CreateStockEntryResponse>('/api/stock', {
         method: 'POST',
         body: JSON.stringify({
           medicineId,
           quantity: parsedQuantity,
-          consumedQuantity: parsedConsumedQuantity
+          type: parsedType
         })
       })
 
       if (!response.ok) {
-        setError(formatValidationError(data))
+        setError(formatValidationError(data as ValidationErrorResponse | null))
         return
       }
 
-      navigate(`/prescriptions/${id}`)
+      if (data.requiresPrescriptionDeduction) {
+        navigate(`/stock/deductions?medicineId=${data.medicineId}&boxes=${data.deductionBoxes}`)
+        return
+      }
+
+      navigate('/overview')
     } catch (err) {
-      setError(err.message ?? 'Failed to add medicine to prescription.')
+      setError(err.message ?? 'Failed to create stock entry.')
     } finally {
       setSaving(false)
     }
@@ -104,7 +97,7 @@ function PrescriptionMedicineAddContent() {
 
   return (
     <div className="container my-5">
-      <h2 className="mb-4">Add Medicine to Prescription</h2>
+      <h2 className="mb-4">Add Stock to Medicine</h2>
       <div className="row">
         <div className="col-md-4">
           <form onSubmit={onSubmit}>
@@ -134,23 +127,24 @@ function PrescriptionMedicineAddContent() {
               <label className="form-label">Quantity</label>
             </div>
             <div className="form-floating mb-3">
-              <input
-                className="form-control"
-                type="number"
-                min="0"
-                value={consumedQuantity}
-                onChange={event => setConsumedQuantity(event.target.value)}
-              />
-              <label className="form-label">Consumed Quantity</label>
+              <select
+                className="form-select"
+                value={type}
+                onChange={event => setType(event.target.value)}
+              >
+                <option value="1">Box</option>
+                <option value="2">Manual</option>
+              </select>
+              <label className="form-label">Type</label>
             </div>
-            <div>
-              <button className="btn btn-primary" type="submit" disabled={saving}>
-                {saving ? 'Saving...' : 'Add Medicine'}
+            <div className="form-floating">
+              <button className="w-100 btn btn-lg btn-primary" type="submit" disabled={saving}>
+                {saving ? 'Creating...' : 'Create'}
               </button>
             </div>
           </form>
           <div className="mt-3">
-            <Link to={`/prescriptions/${id}`} className="btn btn-secondary">Back to Details</Link>
+            <Link to="/stock" className="btn btn-secondary">Back to List</Link>
           </div>
         </div>
       </div>
@@ -158,10 +152,10 @@ function PrescriptionMedicineAddContent() {
   )
 }
 
-export default function PrescriptionMedicineAdd() {
+export default function StockCreate() {
   return (
     <ProtectedRoute>
-      <PrescriptionMedicineAddContent />
+      <StockCreateContent />
     </ProtectedRoute>
   )
 }

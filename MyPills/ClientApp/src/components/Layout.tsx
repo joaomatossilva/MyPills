@@ -1,10 +1,11 @@
+import type { NavLinkRenderProps } from 'react-router-dom'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function Layout() {
   const { isAuthenticated, username, login, logout, loading } = useAuth()
-  const getNavLinkClass = ({ isActive }) => `nav-link${isActive ? ' active' : ''}`
+  const getNavLinkClass = ({ isActive }: NavLinkRenderProps) => `nav-link${isActive ? ' active' : ''}`
 
   useEffect(() => {
     const previousClassName = document.body.className

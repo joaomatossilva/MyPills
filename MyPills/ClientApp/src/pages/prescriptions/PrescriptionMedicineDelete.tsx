@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from '../../api/apiClient'
+import type { PrescriptionDetails, PrescriptionMedicineItem } from '../../types/api'
 
 function PrescriptionMedicineDeleteContent() {
   const { id, medicineId } = useParams()
   const navigate = useNavigate()
-  const [medicine, setMedicine] = useState(null)
+  const [medicine, setMedicine] = useState<PrescriptionMedicineItem | null>(null)
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState(null)
@@ -14,7 +15,7 @@ function PrescriptionMedicineDeleteContent() {
   useEffect(() => {
     const load = async () => {
       try {
-        const { response, data } = await requestJson(`/api/prescriptions/${id}`)
+        const { response, data } = await requestJson<PrescriptionDetails>(`/api/prescriptions/${id}`)
         if (!response.ok) {
           throw new Error('Failed to load prescription.')
         }

@@ -2,18 +2,19 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from './medicinesApi'
+import type { MedicineDetails, MedicineStockEntry } from '../../types/api'
 
 function MedicineDetailsContent() {
   const { id } = useParams()
-  const [medicine, setMedicine] = useState(null)
-  const [stockEntries, setStockEntries] = useState([])
+  const [medicine, setMedicine] = useState<MedicineDetails | null>(null)
+  const [stockEntries, setStockEntries] = useState<MedicineStockEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     const load = async () => {
       try {
-        const { response, data } = await requestJson(`/api/medicines/${id}`)
+        const { response, data } = await requestJson<MedicineDetails>(`/api/medicines/${id}`)
         if (!response.ok) {
           throw new Error('Failed to load medicine.')
         }

@@ -1,4 +1,4 @@
-export function formatDateOnly(value) {
+export function formatDateOnly(value: string | null | undefined): string {
   if (!value) {
     return 'N/A'
   }
@@ -6,7 +6,7 @@ export function formatDateOnly(value) {
   return new Date(`${value}T00:00:00`).toLocaleDateString()
 }
 
-export function formatDateTime(value) {
+export function formatDateTime(value: string | null | undefined): string {
   if (!value) {
     return 'N/A'
   }

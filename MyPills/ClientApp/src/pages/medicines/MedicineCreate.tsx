@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson, formatValidationError } from './medicinesApi'
+import type { MedicineDetails, ValidationErrorResponse } from '../../types/api'
 
 function MedicineCreateContent() {
   const navigate = useNavigate()
@@ -29,7 +30,7 @@ function MedicineCreateContent() {
 
     setSaving(true)
     try {
-      const { response, data } = await requestJson('/api/medicines', {
+      const { response, data } = await requestJson<MedicineDetails>('/api/medicines', {
         method: 'POST',
         body: JSON.stringify({
           name: trimmedName,
@@ -38,7 +39,7 @@ function MedicineCreateContent() {
       })
 
       if (!response.ok) {
-        setError(formatValidationError(data))
+        setError(formatValidationError(data as ValidationErrorResponse | null))
         return
       }
 

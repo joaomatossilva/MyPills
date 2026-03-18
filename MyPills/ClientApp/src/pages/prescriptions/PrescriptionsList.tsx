@@ -3,16 +3,17 @@ import { Link } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from '../../api/apiClient'
 import { formatDateOnly } from '../../utils/dateFormatting'
+import type { PrescriptionListItem, PrescriptionsResponse } from '../../types/api'
 
 function PrescriptionsListContent() {
-  const [prescriptions, setPrescriptions] = useState([])
+  const [prescriptions, setPrescriptions] = useState<PrescriptionListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     const load = async () => {
       try {
-        const { response, data } = await requestJson('/api/prescriptions')
+        const { response, data } = await requestJson<PrescriptionsResponse>('/api/prescriptions')
         if (!response.ok) {
           throw new Error('Failed to load prescriptions.')
         }

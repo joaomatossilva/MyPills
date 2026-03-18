@@ -1,9 +1,10 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import type { AuthContextValue, AuthProviderProps, AuthState, AuthStatusResponse } from '../types/auth'
 
-const AuthContext = createContext(null)
+const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-export function AuthProvider({ children }) {
-  const [authState, setAuthState] = useState({
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     username: null,
     loading: true
@@ -13,14 +14,14 @@ export function AuthProvider({ children }) {
     checkAuthStatus()
   }, [])
 
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = async (): Promise<void> => {
     try {
       const response = await fetch('/api/auth/status', {
         credentials: 'include'
       })
       
       if (response.ok) {
-        const data = await response.json()
+        const data = await response.json() as AuthStatusResponse
         setAuthState({
           isAuthenticated: data.isAuthenticated,
           username: data.username,

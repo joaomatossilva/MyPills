@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { formatValidationError, requestJson } from '../../api/apiClient'
+import type { PrescriptionDetails, ValidationErrorResponse } from '../../types/api'
 
 function PrescriptionEditContent() {
   const { id } = useParams()
@@ -15,7 +16,7 @@ function PrescriptionEditContent() {
   useEffect(() => {
     const load = async () => {
       try {
-        const { response, data } = await requestJson(`/api/prescriptions/${id}`)
+        const { response, data } = await requestJson<PrescriptionDetails>(`/api/prescriptions/${id}`)
         if (!response.ok) {
           throw new Error('Failed to load prescription.')
         }
@@ -53,7 +54,7 @@ function PrescriptionEditContent() {
 
     setSaving(true)
     try {
-      const { response, data } = await requestJson(`/api/prescriptions/${id}`, {
+      const { response, data } = await requestJson<PrescriptionDetails>(`/api/prescriptions/${id}`, {
         method: 'PUT',
         body: JSON.stringify({
           date,
@@ -62,7 +63,7 @@ function PrescriptionEditContent() {
       })
 
       if (!response.ok) {
-        setError(formatValidationError(data))
+        setError(formatValidationError(data as ValidationErrorResponse | null))
         return
       }
 

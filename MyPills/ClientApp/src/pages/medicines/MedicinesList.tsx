@@ -2,16 +2,17 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from './medicinesApi'
+import type { MedicineListItem, MedicinesResponse } from '../../types/api'
 
 function MedicinesListContent() {
-  const [medicines, setMedicines] = useState([])
+  const [medicines, setMedicines] = useState<MedicineListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     const load = async () => {
       try {
-        const { response, data } = await requestJson('/api/medicines')
+        const { response, data } = await requestJson<MedicinesResponse>('/api/medicines')
         if (!response.ok) {
           throw new Error('Failed to load medicines.')
         }

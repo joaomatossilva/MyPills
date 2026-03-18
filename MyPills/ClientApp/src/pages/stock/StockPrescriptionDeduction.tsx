@@ -3,13 +3,14 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { formatValidationError, requestJson } from '../../api/apiClient'
 import { formatDateOnly } from '../../utils/dateFormatting'
+import type { StockDeductionPrescriptionItem, StockDeductionPreviewResponse, ValidationErrorResponse } from '../../types/api'
 
 function StockPrescriptionDeductionContent() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const medicineId = searchParams.get('medicineId') ?? ''
   const boxes = searchParams.get('boxes') ?? ''
-  const [prescriptions, setPrescriptions] = useState([])
+  const [prescriptions, setPrescriptions] = useState<StockDeductionPrescriptionItem[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
@@ -23,7 +24,7 @@ function StockPrescriptionDeductionContent() {
       }
 
       try {
-        const { response, data } = await requestJson(`/api/stock/prescription-deductions?medicineId=${medicineId}&boxes=${boxes}`)
+        const { response, data } = await requestJson<StockDeductionPreviewResponse>(`/api/stock/prescription-deductions?medicineId=${medicineId}&boxes=${boxes}`)
         if (!response.ok) {
           throw new Error('Failed to load prescription deductions.')
         }
@@ -75,7 +76,7 @@ function StockPrescriptionDeductionContent() {
 
     setSaving(true)
     try {
-      const { response, data } = await requestJson('/api/stock/prescription-deductions', {
+      const { response, data } = await requestJson<StockDeductionPreviewResponse>('/api/stock/prescription-deductions', {
         method: 'POST',
         body: JSON.stringify({
           medicineId,
@@ -84,7 +85,7 @@ function StockPrescriptionDeductionContent() {
       })
 
       if (!response.ok) {
-        setError(formatValidationError(data))
+        setError(formatValidationError(data as ValidationErrorResponse | null))
         return
       }
 

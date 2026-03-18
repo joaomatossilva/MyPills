@@ -39,16 +39,16 @@ The built files will be output to the `dist` folder.
 
 ## Structure
 
-- `/src/main.jsx` - Entry point
-- `/src/App.jsx` - Main app component with routing
+- `/src/main.tsx` - Entry point
+- `/src/App.tsx` - Main app component with routing
 - `/src/pages/` - Page components
-  - `Home.jsx` - Public home page
-  - `Test.jsx` - Protected test page
+  - `Home.tsx` - Public home page
+  - `Test.tsx` - Protected test page
 - `/src/components/` - Reusable components
-  - `Layout.jsx` - App layout with navigation
-  - `ProtectedRoute.jsx` - Route protection wrapper
+  - `Layout.tsx` - App layout with navigation
+  - `ProtectedRoute.tsx` - Route protection wrapper
 - `/src/contexts/` - React contexts
-  - `AuthContext.jsx` - Authentication state management
+  - `AuthContext.tsx` - Authentication state management
 
 ## Authentication
 

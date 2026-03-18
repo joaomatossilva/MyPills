@@ -3,16 +3,17 @@ import { Link } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from '../../api/apiClient'
 import { formatDateTime } from '../../utils/dateFormatting'
+import type { StockEntriesResponse, StockEntryListItem } from '../../types/api'
 
 function StockListContent() {
-  const [stockEntries, setStockEntries] = useState([])
+  const [stockEntries, setStockEntries] = useState<StockEntryListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     const load = async () => {
       try {
-        const { response, data } = await requestJson('/api/stock')
+        const { response, data } = await requestJson<StockEntriesResponse>('/api/stock')
         if (!response.ok) {
           throw new Error('Failed to load stock entries.')
         }

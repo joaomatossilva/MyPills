@@ -2,16 +2,17 @@ import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import ProtectedRoute from '../components/ProtectedRoute'
 import { requestJson } from '../api/apiClient'
+import type { OverviewMedicine, OverviewResponse } from '../types/api'
 
 function OverviewContent() {
-  const [medicines, setMedicines] = useState([])
+  const [medicines, setMedicines] = useState<OverviewMedicine[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     const load = async () => {
       try {
-        const { response, data } = await requestJson('/api/overview')
+        const { response, data } = await requestJson<OverviewResponse>('/api/overview')
 
         if (!response.ok) {
           throw new Error('Failed to load overview')

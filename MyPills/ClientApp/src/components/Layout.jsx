@@ -1,9 +1,10 @@
-import { Link, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function Layout() {
   const { isAuthenticated, username, login, logout, loading } = useAuth()
+  const getNavLinkClass = ({ isActive }) => `nav-link${isActive ? ' active' : ''}`
 
   useEffect(() => {
     const previousClassName = document.body.className
@@ -19,8 +20,8 @@ export default function Layout() {
         <a href="#main" className="skip-link">Skip to main content</a>
         <a href="#navigation" className="skip-link">Skip to navigation</a>
       </div>
-      <div className="app-wrapper">
-        <nav className="app-header navbar navbar-expand bg-body">
+      <div className="app-wrapper app-shell">
+        <nav className="app-header app-topbar navbar navbar-expand bg-body">
           <div className="container-fluid">
             <ul className="navbar-nav" role="navigation" aria-label="Navigation 1">
               <li className="nav-item">
@@ -35,29 +36,29 @@ export default function Layout() {
             <ul className="navbar-nav ms-auto">
               {loading ? (
                 <li className="nav-item">
-                  <span className="nav-link">Loading...</span>
+                  <span className="nav-link app-user-pill">Loading...</span>
                 </li>
               ) : isAuthenticated ? (
                 <>
                   <li className="nav-item">
-                    <span className="nav-link">Welcome, {username}</span>
+                    <span className="nav-link app-user-pill">Welcome, {username}</span>
                   </li>
                   <li className="nav-item">
-                    <button type="button" className="btn btn-link nav-link" onClick={logout}>Logout</button>
+                    <button type="button" className="btn btn-link nav-link app-nav-button" onClick={logout}>Logout</button>
                   </li>
                 </>
               ) : (
                 <li className="nav-item">
-                  <button type="button" className="btn btn-link nav-link" onClick={login}>Login</button>
+                  <button type="button" className="btn btn-link nav-link app-nav-button" onClick={login}>Login</button>
                 </li>
               )}
             </ul>
           </div>
         </nav>
 
-        <aside className="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+        <aside className="app-sidebar app-sidebar-panel bg-body-secondary shadow" data-bs-theme="dark">
           <div className="sidebar-brand">
-            <Link to="/" className="brand-link">
+            <Link to="/" className="brand-link app-brand-link">
               <span className="brand-text fw-light">My Pills</span>
             </Link>
           </div>
@@ -72,39 +73,39 @@ export default function Layout() {
                 id="navigation"
               >
                 <li className="nav-item">
-                  <Link to="/" className="nav-link">
+                  <NavLink to="/" end className={getNavLinkClass}>
                     <i className="nav-icon bi bi-download"></i>
                     <p>Home</p>
-                  </Link>
+                  </NavLink>
                 </li>
                 <li className="nav-item">
-                  <Link to="/medicines" className="nav-link">
+                  <NavLink to="/medicines" className={getNavLinkClass}>
                     <i className="nav-icon bi bi-download"></i>
                     <p>Medicines</p>
-                  </Link>
+                  </NavLink>
                 </li>
                 <li className="nav-item">
-                  <Link to="/stock" className="nav-link">
+                  <NavLink to="/stock" className={getNavLinkClass}>
                     <i className="nav-icon bi bi-download"></i>
                     <p>Stock</p>
-                  </Link>
+                  </NavLink>
                 </li>
                 <li className="nav-item">
-                  <Link to="/prescriptions" className="nav-link">
+                  <NavLink to="/prescriptions" className={getNavLinkClass}>
                     <i className="nav-icon bi bi-download"></i>
                     <p>Prescriptions</p>
-                  </Link>
+                  </NavLink>
                 </li>
               </ul>
             </nav>
           </div>
         </aside>
 
-        <main className="app-main" role="main" id="main">
+        <main className="app-main app-main-shell" role="main" id="main">
           <Outlet />
         </main>
 
-        <footer className="app-footer">
+        <footer className="app-footer app-footer-shell">
           &copy; 2026 - MyPills
         </footer>
       </div>

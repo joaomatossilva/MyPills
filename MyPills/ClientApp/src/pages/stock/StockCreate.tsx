@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { formatValidationError, requestJson } from '../../api/apiClient'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useProfile } from '../../contexts/ProfileContext'
 import type { CreateStockEntryResponse, MedicinesResponse, MedicineListItem, ValidationErrorResponse } from '../../types/api'
 
 const stockEntryTypes = [1, 2, 3, 4]
@@ -18,18 +19,44 @@ function StockCreateContent() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { text } = useLanguage()
+  const { selectedProfile, loading: profileLoading } = useProfile()
 
   useEffect(() => {
     const load = async () => {
+      if (!selectedProfile?.canEdit) {
+        setMedicines([])
+        setMedicineId('')
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      setError(null)
+
       try {
-        const { response, data } = await requestJson<MedicinesResponse>('/api/medicines?editableOnly=true')
+        const params = new URLSearchParams({
+          editableOnly: 'true',
+          profileId: selectedProfile.id
+        })
+        const { response, data } = await requestJson<MedicinesResponse>(`/api/medicines?${params.toString()}`)
         if (!response.ok) {
           throw new Error(text.medicines.failedList)
         }
 
         const items = data?.medicines ?? []
         setMedicines(items)
-        setMedicineId(currentMedicineId => currentMedicineId || items[0]?.id || '')
+        setMedicineId(currentMedicineId => {
+          if (items.some(item => item.id === currentMedicineId)) {
+            return currentMedicineId
+          }
+
+          const requestedMedicineId = searchParams.get('medicineId')
+          if (requestedMedicineId && items.some(item => item.id === requestedMedicineId)) {
+            return requestedMedicineId
+          }
+
+          return items[0]?.id ?? ''
+        })
       } catch (err) {
         setError((err as Error).message ?? text.stock.failedLoadForm)
       } finally {
@@ -37,8 +64,10 @@ function StockCreateContent() {
       }
     }
 
-    void load()
-  }, [text.medicines.failedList, text.stock.failedLoadForm])
+    if (!profileLoading) {
+      void load()
+    }
+  }, [profileLoading, searchParams, selectedProfile, text.medicines.failedList, text.stock.failedLoadForm])
 
   const onSubmit = async event => {
     event.preventDefault()
@@ -91,8 +120,26 @@ function StockCreateContent() {
     }
   }
 
-  if (loading) {
+  if (loading || profileLoading) {
     return <div className="loading">{text.common.loadingForm}</div>
+  }
+
+  if (!selectedProfile) {
+    return (
+      <div className="container my-5">
+        <div className="alert alert-info">{text.profiles.selectionRequired}</div>
+        <Link to="/profiles" className="btn btn-secondary">{text.layout.profiles}</Link>
+      </div>
+    )
+  }
+
+  if (!selectedProfile.canEdit) {
+    return (
+      <div className="container my-5">
+        <div className="alert alert-warning">{text.profiles.readOnlySelected}</div>
+        <Link to="/profiles" className="btn btn-secondary">{text.layout.profiles}</Link>
+      </div>
+    )
   }
 
   if (error && medicines.length === 0) {
@@ -107,15 +154,20 @@ function StockCreateContent() {
           <form onSubmit={onSubmit}>
             {error ? <div className="text-danger mb-3">{error}</div> : null}
             <div className="form-floating mb-3">
+              <input className="form-control" value={selectedProfile.name} readOnly disabled />
+              <label className="form-label">{text.profiles.selectedProfile}</label>
+            </div>
+            <div className="form-floating mb-3">
               <select className="form-select" value={medicineId} onChange={event => setMedicineId(event.target.value)}>
                 {medicines.map(item => (
                   <option key={item.id} value={item.id}>
-                    {item.name} ({item.profileName})
+                    {item.name}
                   </option>
                 ))}
               </select>
               <label className="form-label">{text.stock.medicine}</label>
             </div>
+            {medicines.length === 0 ? <div className="alert alert-info">{text.medicines.empty}</div> : null}
             <div className="form-floating mb-3">
               <input className="form-control" type="number" min="1" value={quantity} onChange={event => setQuantity(event.target.value)} />
               <label className="form-label">{text.stock.quantity}</label>

@@ -14,12 +14,22 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
     [HttpGet]
     [ProducesResponseType(typeof(GetMedicinesResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> GetMedicinesAsync([FromQuery] bool editableOnly = false)
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetMedicinesAsync([FromQuery] bool editableOnly = false, [FromQuery] Guid? profileId = null)
     {
         await profileAccessService.EnsureCurrentUserInitializedAsync();
 
-        var viewableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View).Select(x => x.Id);
-        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
+        var viewableProfiles = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View, profileId);
+        var editableProfiles = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit, profileId);
+        var requiredProfiles = editableOnly ? editableProfiles : viewableProfiles;
+
+        if (profileId.HasValue && !await requiredProfiles.AnyAsync())
+        {
+            return NotFound();
+        }
+
+        var viewableProfileIds = viewableProfiles.Select(x => x.Id);
+        var editableProfileIds = editableProfiles.Select(x => x.Id);
         var requiredProfileIds = editableOnly ? editableProfileIds : viewableProfileIds;
         var medicines = await dbContext.Medicines
             .AsNoTracking()

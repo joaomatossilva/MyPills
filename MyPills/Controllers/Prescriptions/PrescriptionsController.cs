@@ -15,12 +15,19 @@ public sealed class PrescriptionsController(ApplicationDbContext dbContext, ICon
     [HttpGet]
     [ProducesResponseType(typeof(GetPrescriptionsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> GetPrescriptionsAsync()
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetPrescriptionsAsync([FromQuery] Guid? profileId = null)
     {
         await profileAccessService.EnsureCurrentUserInitializedAsync();
 
-        var viewableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View).Select(x => x.Id);
-        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
+        var viewableProfiles = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View, profileId);
+        if (profileId.HasValue && !await viewableProfiles.AnyAsync())
+        {
+            return NotFound();
+        }
+
+        var viewableProfileIds = viewableProfiles.Select(x => x.Id);
+        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit, profileId).Select(x => x.Id);
         var prescriptions = await dbContext.Prescriptions
             .AsNoTracking()
             .Include(x => x.Profile)

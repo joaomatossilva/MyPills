@@ -214,6 +214,11 @@ export interface TranslationDictionary {
     createTitle: string
     editTitle: string
     detailsTitle: string
+    selectedProfile: string
+    select: string
+    selected: string
+    selectionRequired: string
+    readOnlySelected: string
     ownedSection: string
     sharedSection: string
     yourCode: string

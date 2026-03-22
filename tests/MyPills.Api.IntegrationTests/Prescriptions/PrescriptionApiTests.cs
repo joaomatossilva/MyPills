@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using MyPills.Api.IntegrationTests.Infrastructure;
+using MyPills.Data;
 
 namespace MyPills.Api.IntegrationTests.Prescriptions;
 
@@ -68,5 +69,47 @@ public sealed class PrescriptionApiTests
         Assert.Equal(30, prescriptionMedicine.GetProperty("boxSize").GetInt32());
         Assert.Equal(3, prescriptionMedicine.GetProperty("quantity").GetInt32());
         Assert.Equal(1, prescriptionMedicine.GetProperty("consumedQuantity").GetInt32());
+    }
+
+    [Fact]
+    public async Task GetPrescriptions_WithProfileId_ReturnsOnlySelectedProfileItems()
+    {
+        await using var factory = new MyPillsApplicationFactory();
+        using var client = factory.CreateApiClient();
+        var selectedProfile = await factory.GetDefaultProfileAsync();
+        var otherProfileId = Guid.NewGuid();
+
+        await factory.SeedAsync(
+            new Profile
+            {
+                Id = otherProfileId,
+                OwnerId = "test-user-id",
+                Name = "Other Profile",
+                IsDefault = false
+            },
+            new Prescription
+            {
+                Id = Guid.NewGuid(),
+                ProfileId = selectedProfile.Id,
+                Date = DateTime.Today.AddDays(-2),
+                ExpiryDate = DateTime.Today.AddDays(10),
+                Medicines = []
+            },
+            new Prescription
+            {
+                Id = Guid.NewGuid(),
+                ProfileId = otherProfileId,
+                Date = DateTime.Today.AddDays(-1),
+                ExpiryDate = DateTime.Today.AddDays(20),
+                Medicines = []
+            });
+
+        using var response = await client.GetAsync($"/api/prescriptions?profileId={selectedProfile.Id}");
+        var payload = await response.ReadJsonAsync();
+        var prescriptions = payload.GetProperty("prescriptions").EnumerateArray().ToArray();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Single(prescriptions);
+        Assert.Equal(selectedProfile.Id, prescriptions[0].GetProperty("profileId").GetGuid());
     }
 }

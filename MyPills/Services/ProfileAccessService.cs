@@ -73,6 +73,17 @@ public sealed class ProfileAccessService(ApplicationDbContext dbContext, IContex
                 || x.Shares.Any(s => s.SharedWithUserId == userId && s.Permission >= requiredPermission)));
     }
 
+    public IQueryable<Profile> QueryAccessibleProfiles(ProfilePermission requiredPermission, Guid? profileId)
+    {
+        var profiles = QueryAccessibleProfiles(requiredPermission);
+        if (profileId is Guid requestedProfileId)
+        {
+            profiles = profiles.Where(x => x.Id == requestedProfileId);
+        }
+
+        return profiles;
+    }
+
     public async Task<Profile?> GetOwnedProfileAsync(Guid profileId)
     {
         return await QueryOwnedProfiles()

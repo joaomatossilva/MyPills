@@ -13,12 +13,19 @@ public sealed class OverviewController(ApplicationDbContext dbContext, ProfileAc
 {
     [HttpGet]
     [ProducesResponseType(typeof(GetOverviewResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAsync()
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAsync([FromQuery] Guid? profileId = null)
     {
         await profileAccessService.EnsureCurrentUserInitializedAsync();
 
         var today = DateTime.Today;
-        var accessibleProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View).Select(x => x.Id);
+        var accessibleProfiles = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View, profileId);
+        if (profileId.HasValue && !await accessibleProfiles.AnyAsync())
+        {
+            return NotFound();
+        }
+
+        var accessibleProfileIds = accessibleProfiles.Select(x => x.Id);
         var medicines = await dbContext.Medicines
             .Include(x => x.Prescriptions)
             .ThenInclude(x => x.Prescription)

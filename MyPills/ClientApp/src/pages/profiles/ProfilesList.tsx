@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from '../../api/apiClient'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useProfile } from '../../contexts/ProfileContext'
 import type { OwnedProfilesResponse, SharedProfilesResponse, UserCodeResponse, OwnedProfileItem, SharedProfileItem } from '../../types/api'
 
 function getPermissionLabel(permission: string, text: ReturnType<typeof useLanguage>['text']) {
@@ -17,6 +18,7 @@ function ProfilesListContent() {
   const [error, setError] = useState<string | null>(null)
   const [regenerating, setRegenerating] = useState(false)
   const { text } = useLanguage()
+  const { selectedProfileId, selectProfile, refreshProfiles } = useProfile()
 
   const load = async () => {
     try {
@@ -33,6 +35,7 @@ function ProfilesListContent() {
       setOwnedProfiles(ownedResult.data?.profiles ?? [])
       setSharedProfiles(sharedResult.data?.profiles ?? [])
       setShareCode(codeResult.data?.shareCode ?? '')
+      await refreshProfiles()
     } catch (err) {
       setError((err as Error).message ?? text.profiles.failedList)
     } finally {
@@ -63,6 +66,21 @@ function ProfilesListContent() {
     } finally {
       setRegenerating(false)
     }
+  }
+
+  const renderSelectionAction = (profileId: string) => {
+    const isSelected = selectedProfileId === profileId
+
+    return (
+      <button
+        type="button"
+        className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-outline-primary'}`}
+        disabled={isSelected}
+        onClick={() => selectProfile(profileId)}
+      >
+        {isSelected ? text.profiles.selected : text.profiles.select}
+      </button>
+    )
   }
 
   if (loading) {
@@ -106,14 +124,16 @@ function ProfilesListContent() {
               <th>{text.profiles.name}</th>
               <th>{text.profiles.isDefault}</th>
               <th>{text.profiles.shareCount}</th>
+              <th className="text-end">{text.profiles.selectedProfile}</th>
             </tr>
           </thead>
           <tbody>
             {ownedProfiles.map(profile => (
-              <tr key={profile.id}>
+              <tr key={profile.id} className={selectedProfileId === profile.id ? 'table-primary' : undefined}>
                 <td><Link to={`/profiles/${profile.id}`}>{profile.name}</Link></td>
                 <td>{profile.isDefault ? 'Yes' : 'No'}</td>
                 <td>{profile.shareCount}</td>
+                <td className="text-end">{renderSelectionAction(profile.id)}</td>
               </tr>
             ))}
           </tbody>
@@ -130,14 +150,16 @@ function ProfilesListContent() {
               <th>{text.profiles.name}</th>
               <th>{text.profiles.owner}</th>
               <th>{text.profiles.permission}</th>
+              <th className="text-end">{text.profiles.selectedProfile}</th>
             </tr>
           </thead>
           <tbody>
             {sharedProfiles.map(profile => (
-              <tr key={profile.id}>
+              <tr key={profile.id} className={selectedProfileId === profile.id ? 'table-primary' : undefined}>
                 <td><Link to={`/profiles/${profile.id}`}>{profile.name}</Link></td>
                 <td>{profile.ownerUsername}</td>
                 <td>{getPermissionLabel(profile.permission, text)}</td>
+                <td className="text-end">{renderSelectionAction(profile.id)}</td>
               </tr>
             ))}
           </tbody>

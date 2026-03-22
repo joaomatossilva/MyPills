@@ -1,41 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { formatValidationError, requestJson } from '../../api/apiClient'
 import { useLanguage } from '../../contexts/LanguageContext'
-import type { EditableProfileItem, EditableProfilesResponse, PrescriptionDetails, ValidationErrorResponse } from '../../types/api'
+import { useProfile } from '../../contexts/ProfileContext'
+import type { PrescriptionDetails, ValidationErrorResponse } from '../../types/api'
 
 function PrescriptionCreateContent() {
   const navigate = useNavigate()
-  const [profiles, setProfiles] = useState<EditableProfileItem[]>([])
-  const [profileId, setProfileId] = useState('')
   const [date, setDate] = useState('')
   const [expiryDate, setExpiryDate] = useState('')
-  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { text } = useLanguage()
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const { response, data } = await requestJson<EditableProfilesResponse>('/api/profiles/editable')
-        if (!response.ok) {
-          throw new Error(text.profiles.failedList)
-        }
-
-        const items = data?.profiles ?? []
-        setProfiles(items)
-        setProfileId(items[0]?.id ?? '')
-      } catch (err) {
-        setError((err as Error).message ?? text.profiles.failedList)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    void load()
-  }, [text.profiles.failedList])
+  const { selectedProfile, loading } = useProfile()
 
   const onSubmit = async event => {
     event.preventDefault()
@@ -56,8 +34,13 @@ function PrescriptionCreateContent() {
       return
     }
 
-    if (!profileId) {
-      setError(text.profiles.failedList)
+    if (!selectedProfile) {
+      setError(text.profiles.selectionRequired)
+      return
+    }
+
+    if (!selectedProfile.canEdit) {
+      setError(text.profiles.readOnlySelected)
       return
     }
 
@@ -66,7 +49,7 @@ function PrescriptionCreateContent() {
       const { response, data } = await requestJson<PrescriptionDetails>('/api/prescriptions', {
         method: 'POST',
         body: JSON.stringify({
-          profileId,
+          profileId: selectedProfile.id,
           date,
           expiryDate
         })
@@ -85,6 +68,28 @@ function PrescriptionCreateContent() {
     }
   }
 
+  if (loading) {
+    return <div className="loading">{text.common.loadingForm}</div>
+  }
+
+  if (!selectedProfile) {
+    return (
+      <div className="container my-5">
+        <div className="alert alert-info">{text.profiles.selectionRequired}</div>
+        <Link to="/profiles" className="btn btn-secondary">{text.layout.profiles}</Link>
+      </div>
+    )
+  }
+
+  if (!selectedProfile.canEdit) {
+    return (
+      <div className="container my-5">
+        <div className="alert alert-warning">{text.profiles.readOnlySelected}</div>
+        <Link to="/profiles" className="btn btn-secondary">{text.layout.profiles}</Link>
+      </div>
+    )
+  }
+
   return (
     <div className="container my-5">
       <h2 className="mb-4">{text.prescriptions.createTitle}</h2>
@@ -93,14 +98,8 @@ function PrescriptionCreateContent() {
           <form onSubmit={onSubmit}>
             {error ? <div className="text-danger mb-3">{error}</div> : null}
             <div className="form-floating mb-3">
-              <select className="form-select" value={profileId} onChange={event => setProfileId(event.target.value)}>
-                {profiles.map(profile => (
-                  <option key={profile.id} value={profile.id}>
-                    {profile.name}
-                  </option>
-                ))}
-              </select>
-              <label className="form-label">{text.prescriptions.profile}</label>
+              <input className="form-control" value={selectedProfile.name} readOnly disabled />
+              <label className="form-label">{text.profiles.selectedProfile}</label>
             </div>
             <div className="form-floating mb-3">
               <input className="form-control" type="date" value={date} onChange={event => setDate(event.target.value)} />
@@ -111,7 +110,7 @@ function PrescriptionCreateContent() {
               <label className="form-label">{text.prescriptions.expiryDate}</label>
             </div>
             <div>
-              <button className="w-100 btn btn-lg btn-primary" type="submit" disabled={saving || loading || !profileId}>
+              <button className="w-100 btn btn-lg btn-primary" type="submit" disabled={saving}>
                 {saving ? `${text.common.create}...` : text.common.create}
               </button>
             </div>

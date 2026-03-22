@@ -116,4 +116,49 @@ public sealed class MedicineApiTests
         Assert.Equal(60, detailsPayload.GetProperty("boxSize").GetInt32());
         Assert.Equal(3, detailsPayload.GetProperty("dailyConsumption").GetInt32());
     }
+
+    [Fact]
+    public async Task GetMedicines_WithProfileId_ReturnsOnlySelectedProfileItems()
+    {
+        await using var factory = new MyPillsApplicationFactory();
+        using var client = factory.CreateApiClient();
+        var selectedProfile = await factory.GetDefaultProfileAsync();
+        var otherProfileId = Guid.NewGuid();
+
+        await factory.SeedAsync(
+            new Profile
+            {
+                Id = otherProfileId,
+                OwnerId = "test-user-id",
+                Name = "Other Profile",
+                IsDefault = false
+            },
+            new Medicine
+            {
+                Id = Guid.NewGuid(),
+                ProfileId = selectedProfile.Id,
+                Name = "Selected Profile Medicine",
+                BoxSize = 20,
+                DailyConsumption = 1,
+                Prescriptions = []
+            },
+            new Medicine
+            {
+                Id = Guid.NewGuid(),
+                ProfileId = otherProfileId,
+                Name = "Other Profile Medicine",
+                BoxSize = 10,
+                DailyConsumption = 2,
+                Prescriptions = []
+            });
+
+        using var response = await client.GetAsync($"/api/medicines?profileId={selectedProfile.Id}");
+        var payload = await response.ReadJsonAsync();
+        var medicines = payload.GetProperty("medicines").EnumerateArray().ToArray();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Single(medicines);
+        Assert.Equal("Selected Profile Medicine", medicines[0].GetProperty("name").GetString());
+        Assert.Equal(selectedProfile.Id, medicines[0].GetProperty("profileId").GetGuid());
+    }
 }

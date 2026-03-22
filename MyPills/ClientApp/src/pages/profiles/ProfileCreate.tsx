@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { formatValidationError, requestJson } from '../../api/apiClient'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useProfile } from '../../contexts/ProfileContext'
 import type { ProfileDetails, ValidationErrorResponse } from '../../types/api'
 
 function ProfileCreateContent() {
@@ -11,6 +12,7 @@ function ProfileCreateContent() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { text } = useLanguage()
+  const { refreshProfiles } = useProfile()
 
   const onSubmit = async event => {
     event.preventDefault()
@@ -34,6 +36,7 @@ function ProfileCreateContent() {
         return
       }
 
+      await refreshProfiles()
       navigate(`/profiles/${data?.id}`)
     } catch (err) {
       setError((err as Error).message ?? text.profiles.failedCreate)

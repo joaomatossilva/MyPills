@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { formatValidationError, requestJson } from '../../api/apiClient'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useProfile } from '../../contexts/ProfileContext'
 import type { ProfileDetails, ValidationErrorResponse } from '../../types/api'
 
 function ProfileEditContent() {
@@ -13,6 +14,7 @@ function ProfileEditContent() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { text } = useLanguage()
+  const { refreshProfiles } = useProfile()
 
   useEffect(() => {
     const load = async () => {
@@ -55,6 +57,7 @@ function ProfileEditContent() {
         return
       }
 
+      await refreshProfiles()
       navigate(`/profiles/${id}`)
     } catch (err) {
       setError((err as Error).message ?? text.profiles.failedUpdate)

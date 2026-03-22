@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import ProtectedRoute from '../components/ProtectedRoute'
 import { requestJson } from '../api/apiClient'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useProfile } from '../contexts/ProfileContext'
 import type { OverviewMedicine, OverviewResponse } from '../types/api'
 
 function OverviewContent() {
@@ -10,11 +11,23 @@ function OverviewContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const { text, locale } = useLanguage()
+  const { selectedProfile, loading: profileLoading } = useProfile()
 
   useEffect(() => {
     const load = async () => {
+      if (!selectedProfile) {
+        setMedicines([])
+        setError(null)
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      setError(null)
+
       try {
-        const { response, data } = await requestJson<OverviewResponse>('/api/overview')
+        const params = new URLSearchParams({ profileId: selectedProfile.id })
+        const { response, data } = await requestJson<OverviewResponse>(`/api/overview?${params.toString()}`)
 
         if (!response.ok) {
           throw new Error(text.overview.error)
@@ -28,10 +41,12 @@ function OverviewContent() {
       }
     }
 
-    load()
-  }, [text.overview.error])
+    if (!profileLoading) {
+      void load()
+    }
+  }, [profileLoading, selectedProfile, text.overview.error])
 
-  if (loading) {
+  if (loading || profileLoading) {
     return <div className="loading">{text.overview.loading}</div>
   }
 
@@ -42,6 +57,7 @@ function OverviewContent() {
   return (
     <div className="container my-5">
       <h2 className="mb-4">{text.overview.title}</h2>
+      {!selectedProfile ? <div className="alert alert-info">{text.profiles.selectionRequired}</div> : null}
 
       <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {medicines.map(item => (
@@ -67,12 +83,14 @@ function OverviewContent() {
                 </ul>
               </div>
               <div className="card-footer bg-white border-top-0 pb-3">
-                <Link
-                  className="btn btn-outline-primary btn-sm w-100"
-                  to={`/stock/new?medicineId=${item.medicineId}`}
-                >
-                  {text.overview.addStock}
-                </Link>
+                {selectedProfile?.canEdit ? (
+                  <Link
+                    className="btn btn-outline-primary btn-sm w-100"
+                    to={`/stock/new?medicineId=${item.medicineId}`}
+                  >
+                    {text.overview.addStock}
+                  </Link>
+                ) : null}
               </div>
             </div>
           </div>

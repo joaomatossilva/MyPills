@@ -63,4 +63,52 @@ public sealed class OverviewApiTests
         Assert.Equal(3, medicine.GetProperty("boxesInPrescription").GetInt32());
         Assert.Equal(stockDate.AddDays(5).Date, estimatedDate.Date);
     }
+
+    [Fact]
+    public async Task GetOverview_WithProfileId_ReturnsOnlySelectedProfileMedicines()
+    {
+        await using var factory = new MyPillsApplicationFactory();
+        using var client = factory.CreateApiClient();
+        var selectedProfile = await factory.GetDefaultProfileAsync();
+        var otherProfileId = Guid.NewGuid();
+
+        await factory.SeedAsync(
+            new Profile
+            {
+                Id = otherProfileId,
+                OwnerId = "test-user-id",
+                Name = "Other Profile",
+                IsDefault = false
+            },
+            new Medicine
+            {
+                Id = Guid.NewGuid(),
+                ProfileId = selectedProfile.Id,
+                Name = "Selected Overview Medicine",
+                BoxSize = 30,
+                DailyConsumption = 1,
+                StockDate = DateTimeOffset.UtcNow,
+                StockQuantity = 12,
+                Prescriptions = []
+            },
+            new Medicine
+            {
+                Id = Guid.NewGuid(),
+                ProfileId = otherProfileId,
+                Name = "Other Overview Medicine",
+                BoxSize = 30,
+                DailyConsumption = 1,
+                StockDate = DateTimeOffset.UtcNow,
+                StockQuantity = 20,
+                Prescriptions = []
+            });
+
+        using var response = await client.GetAsync($"/api/overview?profileId={selectedProfile.Id}");
+        var payload = await response.ReadJsonAsync();
+        var medicines = payload.GetProperty("medicines").EnumerateArray().ToArray();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Single(medicines);
+        Assert.Equal("Selected Overview Medicine", medicines[0].GetProperty("name").GetString());
+    }
 }

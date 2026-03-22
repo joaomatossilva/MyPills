@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from './medicinesApi'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useProfile } from '../../contexts/ProfileContext'
 import type { MedicineListItem, MedicinesResponse } from '../../types/api'
 
 function MedicinesListContent() {
@@ -10,11 +11,23 @@ function MedicinesListContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const { text } = useLanguage()
+  const { selectedProfile, loading: profileLoading } = useProfile()
 
   useEffect(() => {
     const load = async () => {
+      if (!selectedProfile) {
+        setMedicines([])
+        setError(null)
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      setError(null)
+
       try {
-        const { response, data } = await requestJson<MedicinesResponse>('/api/medicines')
+        const params = new URLSearchParams({ profileId: selectedProfile.id })
+        const { response, data } = await requestJson<MedicinesResponse>(`/api/medicines?${params.toString()}`)
         if (!response.ok) {
           throw new Error(text.medicines.failedList)
         }
@@ -27,10 +40,12 @@ function MedicinesListContent() {
       }
     }
 
-    load()
-  }, [text.medicines.failedList])
+    if (!profileLoading) {
+      void load()
+    }
+  }, [profileLoading, selectedProfile, text.medicines.failedList])
 
-  if (loading) {
+  if (loading || profileLoading) {
     return <div className="loading">{text.medicines.loadingList}</div>
   }
 
@@ -40,20 +55,24 @@ function MedicinesListContent() {
 
   return (
     <div className="container my-5">
-      <h2 className="mb-4">{text.medicines.title}</h2>
-      <p>
-        <Link to="/medicines/new" className="btn btn-success">
-          <i className="fa-solid fa-plus"></i> <span>{text.medicines.add}</span>
-        </Link>
-      </p>
+      <div className="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
+        <h2 className="mb-0">{text.medicines.title}</h2>
+        {selectedProfile?.canEdit ? (
+          <Link to="/medicines/new" className="btn btn-success">
+            <i className="fa-solid fa-plus"></i> <span>{text.medicines.add}</span>
+          </Link>
+        ) : null}
+      </div>
 
-      {medicines.length === 0 ? (
+      {!selectedProfile ? <div className="alert alert-info">{text.profiles.selectionRequired}</div> : null}
+      {selectedProfile && !selectedProfile.canEdit ? <div className="alert alert-warning">{text.profiles.readOnlySelected}</div> : null}
+
+      {selectedProfile ? medicines.length === 0 ? (
         <div className="alert alert-info">{text.medicines.empty}</div>
       ) : (
         <table className="table table-striped">
           <thead>
             <tr>
-              <th>{text.medicines.profile}</th>
               <th>{text.medicines.name}</th>
               <th>{text.medicines.boxSize}</th>
               <th>{text.medicines.dailyConsumption}</th>
@@ -63,7 +82,6 @@ function MedicinesListContent() {
           <tbody>
             {medicines.map(item => (
               <tr key={item.id}>
-                <td>{item.profileName}</td>
                 <td>
                   <Link to={`/medicines/${item.id}`}>{item.name}</Link>
                 </td>
@@ -85,7 +103,7 @@ function MedicinesListContent() {
             ))}
           </tbody>
         </table>
-      )}
+      ) : null}
     </div>
   )
 }

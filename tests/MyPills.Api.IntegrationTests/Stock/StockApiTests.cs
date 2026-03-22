@@ -181,4 +181,69 @@ public sealed class StockApiTests
         Assert.Equal(2, appliedDeductions.GetProperty("updatedPrescriptions").GetInt32());
         Assert.Equal([2, 2], consumedQuantities);
     }
+
+    [Fact]
+    public async Task GetStockEntries_WithProfileId_ReturnsOnlySelectedProfileItems()
+    {
+        await using var factory = new MyPillsApplicationFactory();
+        using var client = factory.CreateApiClient();
+        var selectedProfile = await factory.GetDefaultProfileAsync();
+        var otherProfileId = Guid.NewGuid();
+        var selectedMedicineId = Guid.NewGuid();
+        var otherMedicineId = Guid.NewGuid();
+
+        await factory.SeedAsync(
+            new Profile
+            {
+                Id = otherProfileId,
+                OwnerId = "test-user-id",
+                Name = "Other Profile",
+                IsDefault = false
+            },
+            new Medicine
+            {
+                Id = selectedMedicineId,
+                ProfileId = selectedProfile.Id,
+                Name = "Selected Medicine",
+                BoxSize = 20,
+                DailyConsumption = 1,
+                Prescriptions = []
+            },
+            new Medicine
+            {
+                Id = otherMedicineId,
+                ProfileId = otherProfileId,
+                Name = "Other Medicine",
+                BoxSize = 10,
+                DailyConsumption = 1,
+                Prescriptions = []
+            },
+            new StockEntry
+            {
+                Id = Guid.NewGuid(),
+                MedicineId = selectedMedicineId,
+                ProfileId = selectedProfile.Id,
+                Date = DateTimeOffset.UtcNow.AddDays(-1),
+                Quantity = 2,
+                Type = StockEntryType.Increase
+            },
+            new StockEntry
+            {
+                Id = Guid.NewGuid(),
+                MedicineId = otherMedicineId,
+                ProfileId = otherProfileId,
+                Date = DateTimeOffset.UtcNow,
+                Quantity = 3,
+                Type = StockEntryType.Box
+            });
+
+        using var response = await client.GetAsync($"/api/stock?profileId={selectedProfile.Id}");
+        var payload = await response.ReadJsonAsync();
+        var stockEntries = payload.GetProperty("stockEntries").EnumerateArray().ToArray();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Single(stockEntries);
+        Assert.Equal(selectedProfile.Id, stockEntries[0].GetProperty("profileId").GetGuid());
+        Assert.Equal("Selected Medicine", stockEntries[0].GetProperty("medicineName").GetString());
+    }
 }

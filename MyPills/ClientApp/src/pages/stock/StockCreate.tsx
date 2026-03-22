@@ -23,7 +23,7 @@ function StockCreateContent() {
 
   useEffect(() => {
     const load = async () => {
-      if (!selectedProfile?.canEdit) {
+      if (!selectedProfile) {
         setMedicines([])
         setMedicineId('')
         setLoading(false)
@@ -128,15 +128,6 @@ function StockCreateContent() {
     return (
       <div className="container my-5">
         <div className="alert alert-info">{text.profiles.selectionRequired}</div>
-        <Link to="/profiles" className="btn btn-secondary">{text.layout.profiles}</Link>
-      </div>
-    )
-  }
-
-  if (!selectedProfile.canEdit) {
-    return (
-      <div className="container my-5">
-        <div className="alert alert-warning">{text.profiles.readOnlySelected}</div>
         <Link to="/profiles" className="btn btn-secondary">{text.layout.profiles}</Link>
       </div>
     )

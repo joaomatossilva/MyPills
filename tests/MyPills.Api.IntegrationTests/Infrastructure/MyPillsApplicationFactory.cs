@@ -125,7 +125,7 @@ internal sealed class MyPillsApplicationFactory : WebApplicationFactory<Program>
         return profile;
     }
 
-    public async Task SeedUserAsync(string userId, string userName, string shareCode)
+    public async Task SeedUserAsync(string userId, string userName)
     {
         await using var scope = Services.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -143,8 +143,7 @@ internal sealed class MyPillsApplicationFactory : WebApplicationFactory<Program>
             Email = userName,
             NormalizedEmail = userName.ToUpperInvariant(),
             EmailConfirmed = true,
-            SecurityStamp = Guid.NewGuid().ToString("N"),
-            ShareCode = shareCode
+            SecurityStamp = Guid.NewGuid().ToString("N")
         });
 
         EnsureDefaultProfile(dbContext, userId);
@@ -168,8 +167,7 @@ internal sealed class MyPillsApplicationFactory : WebApplicationFactory<Program>
             Email = TestAuthenticationHandler.UserName,
             NormalizedEmail = TestAuthenticationHandler.UserName.ToUpperInvariant(),
             EmailConfirmed = true,
-            SecurityStamp = Guid.NewGuid().ToString("N"),
-            ShareCode = "Aa0001"
+            SecurityStamp = Guid.NewGuid().ToString("N")
         };
 
         dbContext.Users.Add(user);

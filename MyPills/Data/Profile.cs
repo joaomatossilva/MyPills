@@ -17,5 +17,4 @@ public sealed class Profile
     public ICollection<Medicine> Medicines { get; set; } = [];
     public ICollection<Prescription> Prescriptions { get; set; } = [];
     public ICollection<StockEntry> StockEntries { get; set; } = [];
-    public ICollection<ProfileShare> Shares { get; set; } = [];
 }

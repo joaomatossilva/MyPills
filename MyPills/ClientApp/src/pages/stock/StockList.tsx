@@ -59,7 +59,7 @@ function StockListContent() {
     <div className="container my-5">
       <div className="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
         <h2 className="mb-0">{text.stock.title}</h2>
-        {selectedProfile?.canEdit ? (
+        {selectedProfile ? (
           <Link to="/stock/new" className="btn btn-success">
             <i className="fa-solid fa-plus"></i> <span>{text.stock.add}</span>
           </Link>
@@ -67,8 +67,6 @@ function StockListContent() {
       </div>
 
       {!selectedProfile ? <div className="alert alert-info">{text.profiles.selectionRequired}</div> : null}
-      {selectedProfile && !selectedProfile.canEdit ? <div className="alert alert-warning">{text.profiles.readOnlySelected}</div> : null}
-
       {selectedProfile ? stockEntries.length === 0 ? (
         <div className="alert alert-info">{text.stock.empty}</div>
       ) : (

@@ -218,36 +218,17 @@ export interface TranslationDictionary {
     select: string
     selected: string
     selectionRequired: string
-    readOnlySelected: string
     ownedSection: string
-    sharedSection: string
-    yourCode: string
-    regenerateCode: string
     owner: string
-    permission: string
-    sharedWith: string
     isDefault: string
     emptyOwned: string
-    emptyShared: string
-    noShares: string
-    shareProfile: string
-    userCode: string
-    viewPermission: string
-    editPermission: string
     failedList: string
     failedDetails: string
     failedCreate: string
     failedUpdate: string
-    failedShare: string
-    failedRevoke: string
-    failedCode: string
     name: string
-    shareCount: string
     validation: {
       nameRequired: string
-      userCodeRequired: string
-      userCodeInvalid: string
-      permissionRequired: string
     }
   }
 }

@@ -19,22 +19,17 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
     {
         await profileAccessService.EnsureCurrentUserInitializedAsync();
 
-        var viewableProfiles = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View, profileId);
-        var editableProfiles = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit, profileId);
-        var requiredProfiles = editableOnly ? editableProfiles : viewableProfiles;
-
-        if (profileId.HasValue && !await requiredProfiles.AnyAsync())
+        var ownedProfiles = profileAccessService.QueryOwnedProfiles(profileId);
+        if (profileId.HasValue && !await ownedProfiles.AnyAsync())
         {
             return NotFound();
         }
 
-        var viewableProfileIds = viewableProfiles.Select(x => x.Id);
-        var editableProfileIds = editableProfiles.Select(x => x.Id);
-        var requiredProfileIds = editableOnly ? editableProfileIds : viewableProfileIds;
+        var ownedProfileIds = ownedProfiles.Select(x => x.Id);
         var medicines = await dbContext.Medicines
             .AsNoTracking()
             .Include(x => x.Profile)
-            .Where(x => requiredProfileIds.Contains(x.ProfileId))
+            .Where(x => ownedProfileIds.Contains(x.ProfileId))
             .OrderBy(x => x.Name)
             .Select(x => new GetMedicinesItem
             {
@@ -44,7 +39,7 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
                 Name = x.Name,
                 BoxSize = x.BoxSize,
                 DailyConsumption = x.DailyConsumption,
-                CanEdit = editableProfileIds.Contains(x.ProfileId)
+                CanEdit = true
             })
             .ToListAsync();
 
@@ -62,12 +57,11 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
     {
         await profileAccessService.EnsureCurrentUserInitializedAsync();
 
-        var viewableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View).Select(x => x.Id);
-        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
+        var ownedProfileIds = profileAccessService.QueryOwnedProfiles().Select(x => x.Id);
         var medicine = await dbContext.Medicines
             .AsNoTracking()
             .Include(x => x.Profile)
-            .FirstOrDefaultAsync(x => x.Id == id && viewableProfileIds.Contains(x.ProfileId));
+            .FirstOrDefaultAsync(x => x.Id == id && ownedProfileIds.Contains(x.ProfileId));
 
         if (medicine is null)
         {
@@ -97,7 +91,7 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
             DailyConsumption = medicine.DailyConsumption,
             StockQuantity = medicine.StockQuantity,
             StockDate = medicine.StockDate == default ? null : medicine.StockDate,
-            CanEdit = await editableProfileIds.AnyAsync(x => x == medicine.ProfileId),
+            CanEdit = true,
             StockEntries = stockEntries
         };
 
@@ -135,7 +129,7 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
             return ValidationProblem(ModelState);
         }
 
-        var profile = await profileAccessService.GetAccessibleProfileAsync(request.ProfileId, ProfilePermission.Edit);
+        var profile = await profileAccessService.GetOwnedProfileAsync(request.ProfileId);
         if (profile is null)
         {
             return NotFound();
@@ -187,7 +181,7 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
             return ValidationProblem(ModelState);
         }
 
-        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
+        var editableProfileIds = profileAccessService.QueryOwnedProfiles().Select(x => x.Id);
         var medicine = await dbContext.Medicines
             .Include(x => x.Profile)
             .FirstOrDefaultAsync(x => x.Id == id && editableProfileIds.Contains(x.ProfileId));
@@ -223,7 +217,7 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
     {
         await profileAccessService.EnsureCurrentUserInitializedAsync();
 
-        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
+        var editableProfileIds = profileAccessService.QueryOwnedProfiles().Select(x => x.Id);
         var medicine = await dbContext.Medicines
             .FirstOrDefaultAsync(x => x.Id == id && editableProfileIds.Contains(x.ProfileId));
 

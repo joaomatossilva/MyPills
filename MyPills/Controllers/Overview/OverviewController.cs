@@ -19,17 +19,17 @@ public sealed class OverviewController(ApplicationDbContext dbContext, ProfileAc
         await profileAccessService.EnsureCurrentUserInitializedAsync();
 
         var today = DateTime.Today;
-        var accessibleProfiles = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View, profileId);
-        if (profileId.HasValue && !await accessibleProfiles.AnyAsync())
+        var ownedProfiles = profileAccessService.QueryOwnedProfiles(profileId);
+        if (profileId.HasValue && !await ownedProfiles.AnyAsync())
         {
             return NotFound();
         }
 
-        var accessibleProfileIds = accessibleProfiles.Select(x => x.Id);
+        var ownedProfileIds = ownedProfiles.Select(x => x.Id);
         var medicines = await dbContext.Medicines
             .Include(x => x.Prescriptions)
             .ThenInclude(x => x.Prescription)
-            .Where(x => accessibleProfileIds.Contains(x.ProfileId))
+            .Where(x => ownedProfileIds.Contains(x.ProfileId))
             .AsSplitQuery()
             .ToListAsync();
 

@@ -57,7 +57,7 @@ function MedicinesListContent() {
     <div className="container my-5">
       <div className="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
         <h2 className="mb-0">{text.medicines.title}</h2>
-        {selectedProfile?.canEdit ? (
+        {selectedProfile ? (
           <Link to="/medicines/new" className="btn btn-success">
             <i className="fa-solid fa-plus"></i> <span>{text.medicines.add}</span>
           </Link>
@@ -65,8 +65,6 @@ function MedicinesListContent() {
       </div>
 
       {!selectedProfile ? <div className="alert alert-info">{text.profiles.selectionRequired}</div> : null}
-      {selectedProfile && !selectedProfile.canEdit ? <div className="alert alert-warning">{text.profiles.readOnlySelected}</div> : null}
-
       {selectedProfile ? medicines.length === 0 ? (
         <div className="alert alert-info">{text.medicines.empty}</div>
       ) : (

@@ -20,19 +20,18 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
     {
         await profileAccessService.EnsureCurrentUserInitializedAsync();
 
-        var viewableProfiles = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View, profileId);
-        if (profileId.HasValue && !await viewableProfiles.AnyAsync())
+        var ownedProfiles = profileAccessService.QueryOwnedProfiles(profileId);
+        if (profileId.HasValue && !await ownedProfiles.AnyAsync())
         {
             return NotFound();
         }
 
-        var viewableProfileIds = viewableProfiles.Select(x => x.Id);
-        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit, profileId).Select(x => x.Id);
+        var ownedProfileIds = ownedProfiles.Select(x => x.Id);
         var stockEntries = await dbContext.StockEntries
             .AsNoTracking()
             .Include(x => x.Medicine)
             .Include(x => x.Profile)
-            .Where(x => viewableProfileIds.Contains(x.ProfileId))
+            .Where(x => ownedProfileIds.Contains(x.ProfileId))
             .OrderByDescending(x => x.Date)
             .Select(x => new GetStockEntriesItem
             {
@@ -44,7 +43,7 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
                 Date = x.Date,
                 Quantity = x.Quantity,
                 Type = x.Type.ToString(),
-                CanEdit = editableProfileIds.Contains(x.ProfileId)
+                CanEdit = true
             })
             .ToListAsync();
 
@@ -62,13 +61,12 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
     {
         await profileAccessService.EnsureCurrentUserInitializedAsync();
 
-        var viewableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View).Select(x => x.Id);
-        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
+        var ownedProfileIds = profileAccessService.QueryOwnedProfiles().Select(x => x.Id);
         var stockEntry = await dbContext.StockEntries
             .AsNoTracking()
             .Include(x => x.Medicine)
             .Include(x => x.Profile)
-            .FirstOrDefaultAsync(x => x.Id == id && viewableProfileIds.Contains(x.ProfileId));
+            .FirstOrDefaultAsync(x => x.Id == id && ownedProfileIds.Contains(x.ProfileId));
 
         if (stockEntry is null)
         {
@@ -85,7 +83,7 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
             Date = stockEntry.Date,
             Quantity = stockEntry.Quantity,
             Type = stockEntry.Type.ToString(),
-            CanEdit = await editableProfileIds.AnyAsync(x => x == stockEntry.ProfileId)
+            CanEdit = true
         });
     }
 
@@ -114,7 +112,7 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
             return ValidationProblem(ModelState);
         }
 
-        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
+        var editableProfileIds = profileAccessService.QueryOwnedProfiles().Select(x => x.Id);
         var medicine = await dbContext.Medicines
             .Include(x => x.Profile)
             .FirstOrDefaultAsync(x => x.Id == request.MedicineId && editableProfileIds.Contains(x.ProfileId));
@@ -205,7 +203,7 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
             return ValidationProblem(ModelState);
         }
 
-        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
+        var editableProfileIds = profileAccessService.QueryOwnedProfiles().Select(x => x.Id);
         var medicine = await dbContext.Medicines
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == request.MedicineId && editableProfileIds.Contains(x.ProfileId));
@@ -297,7 +295,7 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
             return ValidationProblem(ModelState);
         }
 
-        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
+        var editableProfileIds = profileAccessService.QueryOwnedProfiles().Select(x => x.Id);
         var medicine = await dbContext.Medicines
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == request.MedicineId && editableProfileIds.Contains(x.ProfileId));

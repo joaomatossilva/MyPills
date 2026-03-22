@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { requestJson } from '../api/apiClient'
 import { useAuth } from './AuthContext'
 import { useLanguage } from './LanguageContext'
-import type { OwnedProfilesResponse, SharedProfilesResponse } from '../types/api'
+import type { OwnedProfilesResponse } from '../types/api'
 
 const selectedProfileStorageKey = 'mypills-selected-profile-id'
 
@@ -12,8 +12,6 @@ export interface SelectableProfile {
   name: string
   canEdit: boolean
   isDefault: boolean
-  isOwned: boolean
-  ownerUsername: string | null
 }
 
 interface ProfileContextValue {
@@ -54,41 +52,21 @@ function resolveSelectedProfileId(profiles: SelectableProfile[], currentProfileI
     return currentProfileId
   }
 
-  const ownedDefaultProfile = profiles.find(profile => profile.isOwned && profile.isDefault)
-  if (ownedDefaultProfile) {
-    return ownedDefaultProfile.id
-  }
-
-  const ownedProfile = profiles.find(profile => profile.isOwned)
-  if (ownedProfile) {
-    return ownedProfile.id
+  const defaultProfile = profiles.find(profile => profile.isDefault)
+  if (defaultProfile) {
+    return defaultProfile.id
   }
 
   return profiles[0]?.id ?? null
 }
 
-function mapProfiles(
-  ownedProfiles: OwnedProfilesResponse['profiles'],
-  sharedProfiles: SharedProfilesResponse['profiles']
-): SelectableProfile[] {
-  return [
-    ...ownedProfiles.map(profile => ({
-      id: profile.id,
-      name: profile.name,
-      canEdit: true,
-      isDefault: profile.isDefault,
-      isOwned: true,
-      ownerUsername: null
-    })),
-    ...sharedProfiles.map(profile => ({
-      id: profile.id,
-      name: profile.name,
-      canEdit: profile.permission === 'edit',
-      isDefault: false,
-      isOwned: false,
-      ownerUsername: profile.ownerUsername
-    }))
-  ]
+function mapProfiles(ownedProfiles: OwnedProfilesResponse['profiles']): SelectableProfile[] {
+  return ownedProfiles.map(profile => ({
+    id: profile.id,
+    name: profile.name,
+    canEdit: true,
+    isDefault: profile.isDefault
+  }))
 }
 
 export function ProfileProvider({ children }: { children: ReactNode }) {
@@ -113,16 +91,13 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     setError(null)
 
     try {
-      const [ownedResult, sharedResult] = await Promise.all([
-        requestJson<OwnedProfilesResponse>('/api/profiles'),
-        requestJson<SharedProfilesResponse>('/api/profiles/shared')
-      ])
+      const ownedResult = await requestJson<OwnedProfilesResponse>('/api/profiles')
 
-      if (!ownedResult.response.ok || !sharedResult.response.ok) {
+      if (!ownedResult.response.ok) {
         throw new Error(text.profiles.failedList)
       }
 
-      const nextProfiles = mapProfiles(ownedResult.data?.profiles ?? [], sharedResult.data?.profiles ?? [])
+      const nextProfiles = mapProfiles(ownedResult.data?.profiles ?? [])
       const nextSelectedProfileId = resolveSelectedProfileId(nextProfiles, getStoredSelectedProfileId() ?? selectedProfileId)
 
       setProfiles(nextProfiles)

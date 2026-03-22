@@ -29,11 +29,6 @@ function MedicineCreateContent() {
       return
     }
 
-    if (!selectedProfile.canEdit) {
-      setError(text.profiles.readOnlySelected)
-      return
-    }
-
     if (!trimmedName) {
       setError(text.medicines.validation.nameRequired)
       return
@@ -82,15 +77,6 @@ function MedicineCreateContent() {
     return (
       <div className="container my-5">
         <div className="alert alert-info">{text.profiles.selectionRequired}</div>
-        <Link to="/profiles" className="btn btn-secondary">{text.layout.profiles}</Link>
-      </div>
-    )
-  }
-
-  if (!selectedProfile.canEdit) {
-    return (
-      <div className="container my-5">
-        <div className="alert alert-warning">{text.profiles.readOnlySelected}</div>
         <Link to="/profiles" className="btn btn-secondary">{text.layout.profiles}</Link>
       </div>
     )

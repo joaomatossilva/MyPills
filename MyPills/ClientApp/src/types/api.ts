@@ -143,52 +143,15 @@ export interface OwnedProfileItem {
   id: string
   name: string
   isDefault: boolean
-  shareCount: number
 }
 
 export interface OwnedProfilesResponse {
   profiles: OwnedProfileItem[]
 }
 
-export interface SharedProfileItem {
-  id: string
-  name: string
-  ownerUsername: string
-  permission: string
-}
-
-export interface SharedProfilesResponse {
-  profiles: SharedProfileItem[]
-}
-
-export interface EditableProfileItem {
-  id: string
-  name: string
-  ownerUsername: string
-  isOwned: boolean
-}
-
-export interface EditableProfilesResponse {
-  profiles: EditableProfileItem[]
-}
-
-export interface ProfileShareItem {
-  id: string
-  sharedWithUsername: string
-  sharedWithUserCode: string
-  permission: string
-}
-
 export interface ProfileDetails {
   id: string
   name: string
   isDefault: boolean
-  isOwner: boolean
   ownerUsername: string
-  permission: string
-  shares: ProfileShareItem[]
-}
-
-export interface UserCodeResponse {
-  shareCode: string
 }

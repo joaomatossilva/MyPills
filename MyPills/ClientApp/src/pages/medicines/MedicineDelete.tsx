@@ -3,11 +3,12 @@ import { useNavigate, useParams, Link } from 'react-router-dom'
 import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from './medicinesApi'
 import { useLanguage } from '../../contexts/LanguageContext'
+import type { MedicineDetails } from '../../types/api'
 
 function MedicineDeleteContent() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [medicine, setMedicine] = useState(null)
+  const [medicine, setMedicine] = useState<MedicineDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [deleting, setDeleting] = useState(false)
@@ -16,12 +17,12 @@ function MedicineDeleteContent() {
   useEffect(() => {
     const load = async () => {
       try {
-        const { response, data } = await requestJson(`/api/medicines/${id}`)
+        const { response, data } = await requestJson<MedicineDetails>(`/api/medicines/${id}`)
         if (!response.ok) {
           throw new Error(text.medicines.failedDetails)
         }
 
-        setMedicine(data)
+        setMedicine(data ?? null)
       } catch (err) {
         setError((err as Error).message ?? text.medicines.failedDetails)
       } finally {
@@ -78,6 +79,8 @@ function MedicineDeleteContent() {
           <dd className="col-sm-10">{medicine.name}</dd>
           <dt className="col-sm-2">{text.medicines.boxSize}</dt>
           <dd className="col-sm-10">{medicine.boxSize}</dd>
+          <dt className="col-sm-2">{text.medicines.dailyConsumption}</dt>
+          <dd className="col-sm-10">{medicine.dailyConsumption}</dd>
         </dl>
 
         {error && <div className="text-danger mb-3">{error}</div>}

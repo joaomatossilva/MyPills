@@ -116,6 +116,7 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
       addStockEntry: 'Add Stock Entry',
       name: 'Name',
       boxSize: 'Box Size',
+      dailyConsumption: 'Daily Consumption',
       stockQuantity: 'Stock Quantity',
       stockDate: 'Stock Date',
       date: 'Date',
@@ -129,7 +130,8 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
       failedDelete: 'Failed to delete medicine.',
       validation: {
         nameRequired: 'Name is required.',
-        boxSizePositive: 'Box size must be a positive whole number.'
+        boxSizePositive: 'Box size must be a positive whole number.',
+        dailyConsumptionPositive: 'Daily consumption must be a positive whole number.'
       }
     },
     prescriptions: {
@@ -318,6 +320,7 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
       addStockEntry: 'Adicionar registo de stock',
       name: 'Nome',
       boxSize: 'Tamanho da caixa',
+      dailyConsumption: 'Consumo diário',
       stockQuantity: 'Quantidade em stock',
       stockDate: 'Data do stock',
       date: 'Data',
@@ -331,7 +334,8 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
       failedDelete: 'Falha ao eliminar medicamento.',
       validation: {
         nameRequired: 'O nome é obrigatório.',
-        boxSizePositive: 'O tamanho da caixa deve ser um número inteiro positivo.'
+        boxSizePositive: 'O tamanho da caixa deve ser um número inteiro positivo.',
+        dailyConsumptionPositive: 'O consumo diário deve ser um número inteiro positivo.'
       }
     },
     prescriptions: {

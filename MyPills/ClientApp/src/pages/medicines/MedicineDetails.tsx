@@ -60,6 +60,8 @@ function MedicineDetailsContent() {
         <dd className="col-sm-10">{medicine.name}</dd>
         <dt className="col-sm-2">{text.medicines.boxSize}</dt>
         <dd className="col-sm-10">{medicine.boxSize}</dd>
+        <dt className="col-sm-2">{text.medicines.dailyConsumption}</dt>
+        <dd className="col-sm-10">{medicine.dailyConsumption}</dd>
         <dt className="col-sm-2">{text.medicines.stockQuantity}</dt>
         <dd className="col-sm-10">{medicine.stockQuantity}</dd>
         <dt className="col-sm-2">{text.medicines.stockDate}</dt>

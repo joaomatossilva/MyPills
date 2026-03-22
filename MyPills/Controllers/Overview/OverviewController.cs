@@ -32,15 +32,16 @@ public sealed class OverviewController(ApplicationDbContext dbContext) : Control
 
                 if (x.StockQuantity > 0 && x.StockDate != default)
                 {
-                    var dateTime = x.StockDate.DateTime;
-                    var days = (today - dateTime.Date).Days;
-                    var estimated = x.StockDate.AddDays(x.StockQuantity);
+                    var days = (today - x.StockDate.Date).Days;
+                    var estimatedDays = x.StockQuantity / x.DailyConsumption;
+                    var estimated = x.StockDate.AddDays(estimatedDays);
 
                     return new OverviewMedicineDto
                     {
                         MedicineId = x.Id,
                         Name = x.Name,
-                        AvailableQuantity = x.StockQuantity - days,
+                        DailyConsumption = x.DailyConsumption,
+                        AvailableQuantity = x.StockQuantity - (days * x.DailyConsumption),
                         BoxesInPrescription = inPrescription,
                         EstimatedDate = estimated
                     };
@@ -50,6 +51,7 @@ public sealed class OverviewController(ApplicationDbContext dbContext) : Control
                 {
                     MedicineId = x.Id,
                     Name = x.Name,
+                    DailyConsumption = x.DailyConsumption,
                     AvailableQuantity = 0,
                     BoxesInPrescription = inPrescription,
                     EstimatedDate = today

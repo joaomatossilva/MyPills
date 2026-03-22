@@ -10,5 +10,8 @@ public sealed class UpdateMedicineRequest
 
     [Range(1, int.MaxValue)]
     public int BoxSize { get; init; }
+
+    [Range(1, int.MaxValue)]
+    public int DailyConsumption { get; init; } = 1;
 }
 

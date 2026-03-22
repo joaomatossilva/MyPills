@@ -11,6 +11,7 @@ export interface RequestJsonResult<T> {
 export interface OverviewMedicine {
   medicineId: string
   name: string
+  dailyConsumption: number
   availableQuantity: number
   boxesInPrescription: number
   estimatedDate: string
@@ -24,6 +25,7 @@ export interface MedicineListItem {
   id: string
   name: string
   boxSize: number
+  dailyConsumption: number
 }
 
 export interface MedicinesResponse {
@@ -41,6 +43,7 @@ export interface MedicineDetails {
   id: string
   name: string
   boxSize: number
+  dailyConsumption: number
   stockQuantity: number
   stockDate: string | null
   stockEntries: MedicineStockEntry[]

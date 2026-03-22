@@ -54,6 +54,8 @@ function MedicinesListContent() {
           <thead>
             <tr>
               <th>{text.medicines.name}</th>
+              <th>{text.medicines.boxSize}</th>
+              <th>{text.medicines.dailyConsumption}</th>
               <th></th>
             </tr>
           </thead>
@@ -63,6 +65,8 @@ function MedicinesListContent() {
                 <td>
                   <Link to={`/medicines/${item.id}`}>{item.name}</Link>
                 </td>
+                <td>{item.boxSize}</td>
+                <td>{item.dailyConsumption}</td>
                 <td className="text-end">
                   <Link to={`/medicines/${item.id}/edit`} className="me-3">
                     <i className="fa-regular fa-pen-to-square"></i>

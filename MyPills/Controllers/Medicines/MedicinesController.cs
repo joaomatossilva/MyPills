@@ -22,7 +22,8 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
             {
                 Id = x.Id,
                 Name = x.Name,
-                BoxSize = x.BoxSize
+                BoxSize = x.BoxSize,
+                DailyConsumption = x.DailyConsumption
             })
             .ToListAsync();
 
@@ -65,6 +66,7 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
             Id = medicine.Id,
             Name = medicine.Name,
             BoxSize = medicine.BoxSize,
+            DailyConsumption = medicine.DailyConsumption,
             StockQuantity = medicine.StockQuantity,
             StockDate = medicine.StockDate == default ? null : medicine.StockDate,
             StockEntries = stockEntries
@@ -102,7 +104,8 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
             Id = Guid.NewGuid(),
             UserId = userId,
             Name = name,
-            BoxSize = request.BoxSize
+            BoxSize = request.BoxSize,
+            DailyConsumption = request.DailyConsumption
         };
 
         dbContext.Medicines.Add(medicine);
@@ -112,7 +115,8 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
         {
             Id = medicine.Id,
             Name = medicine.Name,
-            BoxSize = medicine.BoxSize
+            BoxSize = medicine.BoxSize,
+            DailyConsumption = medicine.DailyConsumption
         };
 
         return Created(Url.Action("GetMedicineDetails", new { id = medicine.Id }), response);
@@ -147,13 +151,15 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
 
         medicine.Name = name;
         medicine.BoxSize = request.BoxSize;
+        medicine.DailyConsumption = request.DailyConsumption;
         await dbContext.SaveChangesAsync();
 
         var response = new UpdateMedicineResponse
         {
             Id = medicine.Id,
             Name = medicine.Name,
-            BoxSize = medicine.BoxSize
+            BoxSize = medicine.BoxSize,
+            DailyConsumption = medicine.DailyConsumption
         };
 
         return Ok(response);

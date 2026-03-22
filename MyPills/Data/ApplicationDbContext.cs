@@ -14,6 +14,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Medicine>()
+            .Property(x => x.DailyConsumption)
+            .HasDefaultValue(1);
         
         // Apply UserId filter explicitly for each entity
         modelBuilder.Entity<Medicine>().HasQueryFilter(e => EF.Property<string>(e, "UserId") == contextUser.UserId);

@@ -10,6 +10,7 @@ function MedicineEditContent() {
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [boxSize, setBoxSize] = useState('')
+  const [dailyConsumption, setDailyConsumption] = useState('1')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
@@ -25,6 +26,7 @@ function MedicineEditContent() {
 
         setName(data.name ?? '')
         setBoxSize(String(data.boxSize ?? ''))
+        setDailyConsumption(String(data.dailyConsumption ?? 1))
       } catch (err) {
         setError((err as Error).message ?? text.medicines.failedDetails)
       } finally {
@@ -41,6 +43,7 @@ function MedicineEditContent() {
 
     const trimmedName = name.trim()
     const parsedBoxSize = Number(boxSize)
+    const parsedDailyConsumption = Number(dailyConsumption)
 
     if (!trimmedName) {
       setError(text.medicines.validation.nameRequired)
@@ -52,13 +55,19 @@ function MedicineEditContent() {
       return
     }
 
+    if (!Number.isInteger(parsedDailyConsumption) || parsedDailyConsumption <= 0) {
+      setError(text.medicines.validation.dailyConsumptionPositive)
+      return
+    }
+
     setSaving(true)
     try {
       const { response, data } = await requestJson<MedicineDetails>(`/api/medicines/${id}`, {
         method: 'PUT',
         body: JSON.stringify({
           name: trimmedName,
-          boxSize: parsedBoxSize
+          boxSize: parsedBoxSize,
+          dailyConsumption: parsedDailyConsumption
         })
       })
 
@@ -109,6 +118,17 @@ function MedicineEditContent() {
                 placeholder="Box Size"
               />
               <label className="form-label">{text.medicines.boxSize}</label>
+            </div>
+            <div className="form-floating mb-3">
+              <input
+                className="form-control"
+                type="number"
+                min="1"
+                value={dailyConsumption}
+                onChange={event => setDailyConsumption(event.target.value)}
+                placeholder="Daily Consumption"
+              />
+              <label className="form-label">{text.medicines.dailyConsumption}</label>
             </div>
             <div>
               <button className="btn btn-primary" type="submit" disabled={saving}>

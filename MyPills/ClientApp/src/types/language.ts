@@ -104,6 +104,7 @@ export interface TranslationDictionary {
     addStockEntry: string
     name: string
     boxSize: string
+    dailyConsumption: string
     stockQuantity: string
     stockDate: string
     date: string
@@ -118,6 +119,7 @@ export interface TranslationDictionary {
     validation: {
       nameRequired: string
       boxSizePositive: string
+      dailyConsumptionPositive: string
     }
   }
   prescriptions: {

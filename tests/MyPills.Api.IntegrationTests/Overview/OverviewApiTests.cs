@@ -24,6 +24,7 @@ public sealed class OverviewApiTests
                 UserId = TestAuthenticationHandler.UserId,
                 Name = "Vitamin D",
                 BoxSize = 30,
+                DailyConsumption = 2,
                 StockDate = stockDate,
                 StockQuantity = 10,
                 Prescriptions = []
@@ -56,8 +57,9 @@ public sealed class OverviewApiTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal(medicineId, medicine.GetProperty("medicineId").GetGuid());
         Assert.Equal("Vitamin D", medicine.GetProperty("name").GetString());
-        Assert.Equal(8, medicine.GetProperty("availableQuantity").GetInt32());
+        Assert.Equal(2, medicine.GetProperty("dailyConsumption").GetInt32());
+        Assert.Equal(6, medicine.GetProperty("availableQuantity").GetInt32());
         Assert.Equal(3, medicine.GetProperty("boxesInPrescription").GetInt32());
-        Assert.Equal(stockDate.AddDays(10).Date, estimatedDate.Date);
+        Assert.Equal(stockDate.AddDays(5).Date, estimatedDate.Date);
     }
 }

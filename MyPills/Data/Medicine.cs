@@ -14,6 +14,7 @@ public class Medicine
     public string Name { get; set; } = string.Empty;
 
     public int BoxSize { get; set; } = 0;
+    public int DailyConsumption { get; set; } = 1;
     
     [DisplayFormat(DataFormatString = "{0:d}")]
     public DateTimeOffset StockDate { get; set; }

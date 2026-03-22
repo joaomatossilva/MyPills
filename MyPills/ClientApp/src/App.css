@@ -244,6 +244,51 @@ body.layout-fixed {
   color: var(--app-text);
 }
 
+.app-topbar-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.app-topbar-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.app-header-brand {
+  color: var(--app-text);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.app-header-brand:hover {
+  color: var(--app-primary-dark);
+}
+
+.app-sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.5rem 0.75rem !important;
+  color: var(--app-text) !important;
+  text-decoration: none;
+}
+
+.app-sidebar-toggle:hover {
+  background: rgba(13, 110, 253, 0.08);
+  color: var(--app-primary) !important;
+}
+
+.app-topbar-actions {
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .app-language-picker {
   display: flex;
   align-items: center;
@@ -292,6 +337,10 @@ body.layout-fixed {
 .app-brand-link .brand-text {
   font-weight: 700 !important;
   letter-spacing: 0.02em;
+}
+
+.app-sidebar-backdrop {
+  display: none;
 }
 
 .app-sidebar-panel .nav-link {
@@ -510,6 +559,17 @@ body.layout-fixed {
 }
 
 @media (max-width: 991px) {
+  .app-topbar-content {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .app-topbar-actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
   .app-main-shell {
     padding-top: 1.25rem;
   }
@@ -524,6 +584,34 @@ body.layout-fixed {
   }
 
   .app-language-picker {
-    margin: 0.5rem 0;
+    margin: 0;
+    flex-wrap: wrap;
+  }
+
+  .app-sidebar-panel {
+    transform: translateX(-100%);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    z-index: 1037;
+  }
+
+  .app-shell--sidebar-open .app-sidebar-panel {
+    transform: translateX(0);
+    box-shadow: 0 1rem 3rem rgba(15, 23, 42, 0.28);
+  }
+
+  .app-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1036;
+    border: 0;
+    padding: 0;
+    background: rgba(15, 23, 42, 0.38);
+  }
+}
+
+@media (min-width: 992px) {
+  .app-sidebar-panel {
+    transform: none !important;
   }
 }

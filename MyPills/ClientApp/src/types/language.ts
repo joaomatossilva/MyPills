@@ -21,6 +21,8 @@ export interface TranslationDictionary {
     footer: string
     skipToContent: string
     skipToNavigation: string
+    expandSidebar: string
+    collapseSidebar: string
   }
   common: {
     loading: string

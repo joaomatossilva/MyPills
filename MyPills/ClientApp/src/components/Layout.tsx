@@ -1,21 +1,76 @@
 import type { NavLinkRenderProps } from 'react-router-dom'
-import { Link, NavLink, Outlet } from 'react-router-dom'
-import { useEffect } from 'react'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/LanguageContext'
 
+const desktopSidebarMediaQuery = '(min-width: 992px)'
+
+function isDesktopViewport() {
+  return typeof window !== 'undefined' && window.matchMedia(desktopSidebarMediaQuery).matches
+}
+
 export default function Layout() {
+  const location = useLocation()
   const { isAuthenticated, username, login, logout, loading } = useAuth()
   const { language, setLanguage, text, availableLanguages } = useLanguage()
+  const [isDesktop, setIsDesktop] = useState(isDesktopViewport)
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(isDesktopViewport)
+  const originalBodyClassNameRef = useRef<string | null>(null)
   const getNavLinkClass = ({ isActive }: NavLinkRenderProps) => `nav-link${isActive ? ' active' : ''}`
+  const sidebarToggleLabel = isSidebarExpanded ? text.layout.collapseSidebar : text.layout.expandSidebar
 
   useEffect(() => {
-    const previousClassName = document.body.className
-    document.body.className = 'layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary'
+    const mediaQueryList = window.matchMedia(desktopSidebarMediaQuery)
+    const handleViewportChange = (event: MediaQueryListEvent) => {
+      setIsDesktop(event.matches)
+      setIsSidebarExpanded(event.matches)
+    }
+
+    setIsDesktop(mediaQueryList.matches)
+    setIsSidebarExpanded(mediaQueryList.matches)
+    mediaQueryList.addEventListener('change', handleViewportChange)
+
     return () => {
-      document.body.className = previousClassName
+      mediaQueryList.removeEventListener('change', handleViewportChange)
     }
   }, [])
+
+  useEffect(() => {
+    if (!isDesktop) {
+      setIsSidebarExpanded(false)
+    }
+  }, [isDesktop, location.pathname])
+
+  const bodyClassName = [
+    'layout-fixed',
+    'sidebar-expand-lg',
+    'bg-body-tertiary',
+    isDesktop
+      ? (isSidebarExpanded ? null : 'sidebar-collapse')
+      : (isSidebarExpanded ? 'sidebar-open' : null)
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  useEffect(() => {
+    originalBodyClassNameRef.current ??= document.body.className
+    document.body.className = bodyClassName
+
+    return () => {
+      document.body.className = originalBodyClassNameRef.current ?? ''
+    }
+  }, [bodyClassName])
+
+  const toggleSidebar = () => {
+    setIsSidebarExpanded(previousValue => !previousValue)
+  }
+
+  const closeMobileSidebar = () => {
+    if (!isDesktop) {
+      setIsSidebarExpanded(false)
+    }
+  }
 
   return (
     <>
@@ -23,20 +78,28 @@ export default function Layout() {
         <a href="#main" className="skip-link">{text.layout.skipToContent}</a>
         <a href="#navigation" className="skip-link">{text.layout.skipToNavigation}</a>
       </div>
-      <div className="app-wrapper app-shell">
+      <div className={`app-wrapper app-shell${isSidebarExpanded ? ' app-shell--sidebar-open' : ''}`}>
         <nav className="app-header app-topbar navbar navbar-expand bg-body">
-          <div className="container-fluid">
-            <ul className="navbar-nav" role="navigation" aria-label="Navigation 1">
+          <div className="container-fluid app-topbar-content">
+            <div className="app-topbar-title">
+              <button
+                type="button"
+                className="btn btn-link nav-link app-sidebar-toggle"
+                aria-label={sidebarToggleLabel}
+                aria-controls="app-sidebar"
+                aria-expanded={isSidebarExpanded}
+                onClick={toggleSidebar}
+              >
+                <i className="fa-solid fa-bars" aria-hidden="true"></i>
+              </button>
+              <Link to="/" className="app-header-brand" onClick={closeMobileSidebar}>My Pills</Link>
+            </div>
+            <ul className="navbar-nav d-none d-md-flex" role="navigation" aria-label="Navigation 1">
               <li className="nav-item">
-                <a className="nav-link" data-lte-toggle="sidebar" href="#" role="button">
-                  <i className="fa-solid fa-list"></i>
-                </a>
-              </li>
-              <li className="nav-item d-none d-md-block">
                 <Link to="/" className="nav-link">{text.layout.home}</Link>
               </li>
             </ul>
-            <ul className="navbar-nav ms-auto">
+            <ul className="navbar-nav ms-auto app-topbar-actions">
               <li className="nav-item app-language-picker">
                 <label className="app-language-label" htmlFor="app-language-select">{text.layout.languageLabel}</label>
                 <select
@@ -74,9 +137,23 @@ export default function Layout() {
           </div>
         </nav>
 
-        <aside className="app-sidebar app-sidebar-panel bg-body-secondary shadow" data-bs-theme="dark">
+        {!isDesktop && isSidebarExpanded ? (
+          <button
+            type="button"
+            className="app-sidebar-backdrop"
+            aria-label={text.layout.collapseSidebar}
+            onClick={closeMobileSidebar}
+          />
+        ) : null}
+
+        <aside
+          id="app-sidebar"
+          className="app-sidebar app-sidebar-panel bg-body-secondary shadow"
+          data-bs-theme="dark"
+          aria-hidden={!isDesktop && !isSidebarExpanded}
+        >
           <div className="sidebar-brand">
-            <Link to="/" className="brand-link app-brand-link">
+            <Link to="/" className="brand-link app-brand-link" onClick={closeMobileSidebar}>
               <span className="brand-text fw-light">My Pills</span>
             </Link>
           </div>
@@ -91,25 +168,25 @@ export default function Layout() {
                 id="navigation"
               >
                 <li className="nav-item">
-                  <NavLink to="/" end className={getNavLinkClass}>
+                  <NavLink to="/" end className={getNavLinkClass} onClick={closeMobileSidebar}>
                     <i className="nav-icon bi bi-download"></i>
                     <p>{text.layout.home}</p>
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink to="/medicines" className={getNavLinkClass}>
+                  <NavLink to="/medicines" className={getNavLinkClass} onClick={closeMobileSidebar}>
                     <i className="nav-icon bi bi-download"></i>
                     <p>{text.layout.medicines}</p>
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink to="/stock" className={getNavLinkClass}>
+                  <NavLink to="/stock" className={getNavLinkClass} onClick={closeMobileSidebar}>
                     <i className="nav-icon bi bi-download"></i>
                     <p>{text.layout.stock}</p>
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink to="/prescriptions" className={getNavLinkClass}>
+                  <NavLink to="/prescriptions" className={getNavLinkClass} onClick={closeMobileSidebar}>
                     <i className="nav-icon bi bi-download"></i>
                     <p>{text.layout.prescriptions}</p>
                   </NavLink>

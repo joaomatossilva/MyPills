@@ -18,3 +18,4 @@
 ## General Guidance
 - Use async EF Core APIs (`ToListAsync`, `FirstOrDefaultAsync`, `SaveChangesAsync`).
 - Validate inputs and handle nulls defensively.
+- For UI work, ensure layouts are responsive and adapt cleanly to both large screens and smaller screens, including mobile phones.

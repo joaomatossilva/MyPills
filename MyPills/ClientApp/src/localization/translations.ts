@@ -27,7 +27,9 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
       languageLabel: 'Language',
       footer: 'MyPills',
       skipToContent: 'Skip to main content',
-      skipToNavigation: 'Skip to navigation'
+      skipToNavigation: 'Skip to navigation',
+      expandSidebar: 'Expand sidebar',
+      collapseSidebar: 'Collapse sidebar'
     },
     common: {
       loading: 'Loading...',
@@ -227,7 +229,9 @@ export const translations: Record<AppLanguage, TranslationDictionary> = {
       languageLabel: 'Idioma',
       footer: 'MyPills',
       skipToContent: 'Saltar para o conteúdo principal',
-      skipToNavigation: 'Saltar para a navegação'
+      skipToNavigation: 'Saltar para a navegação',
+      expandSidebar: 'Expandir barra lateral',
+      collapseSidebar: 'Colapsar barra lateral'
     },
     common: {
       loading: 'A carregar...',

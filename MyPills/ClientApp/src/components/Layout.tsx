@@ -100,21 +100,6 @@ export default function Layout() {
               </li>
             </ul>
             <ul className="navbar-nav ms-auto app-topbar-actions">
-              <li className="nav-item app-language-picker">
-                <label className="app-language-label" htmlFor="app-language-select">{text.layout.languageLabel}</label>
-                <select
-                  id="app-language-select"
-                  className="form-select form-select-sm app-language-select"
-                  value={language}
-                  onChange={event => setLanguage(event.target.value as typeof language)}
-                >
-                  {availableLanguages.map(option => (
-                    <option key={option.code} value={option.code}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </li>
               {loading ? (
                 <li className="nav-item">
                   <span className="nav-link app-user-pill">{text.layout.loading}</span>
@@ -158,6 +143,21 @@ export default function Layout() {
             </Link>
           </div>
           <div className="sidebar-wrapper">
+            <div className="app-sidebar-language-picker">
+              <label className="app-language-label" htmlFor="app-language-select">{text.layout.languageLabel}</label>
+              <select
+                id="app-language-select"
+                className="form-select form-select-sm app-language-select"
+                value={language}
+                onChange={event => setLanguage(event.target.value as typeof language)}
+              >
+                {availableLanguages.map(option => (
+                  <option key={option.code} value={option.code}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
             <nav className="mt-2">
               <ul
                 className="nav sidebar-menu flex-column"

@@ -2,28 +2,39 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyPills.Data;
+using MyPills.Services;
 
 namespace MyPills.Controllers.Medicines;
 
 [ApiController]
 [Route("api/medicines")]
 [Authorize]
-public sealed class MedicinesController(ApplicationDbContext dbContext, IContextUser contextUser) : ControllerBase
+public sealed class MedicinesController(ApplicationDbContext dbContext, IContextUser contextUser, ProfileAccessService profileAccessService) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType(typeof(GetMedicinesResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> GetMedicinesAsync()
+    public async Task<IActionResult> GetMedicinesAsync([FromQuery] bool editableOnly = false)
     {
+        await profileAccessService.EnsureCurrentUserInitializedAsync();
+
+        var viewableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View).Select(x => x.Id);
+        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
+        var requiredProfileIds = editableOnly ? editableProfileIds : viewableProfileIds;
         var medicines = await dbContext.Medicines
             .AsNoTracking()
+            .Include(x => x.Profile)
+            .Where(x => requiredProfileIds.Contains(x.ProfileId))
             .OrderBy(x => x.Name)
             .Select(x => new GetMedicinesItem
             {
                 Id = x.Id,
+                ProfileId = x.ProfileId,
+                ProfileName = x.Profile.Name,
                 Name = x.Name,
                 BoxSize = x.BoxSize,
-                DailyConsumption = x.DailyConsumption
+                DailyConsumption = x.DailyConsumption,
+                CanEdit = editableProfileIds.Contains(x.ProfileId)
             })
             .ToListAsync();
 
@@ -39,9 +50,14 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMedicineDetailsAsync(Guid id)
     {
+        await profileAccessService.EnsureCurrentUserInitializedAsync();
+
+        var viewableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View).Select(x => x.Id);
+        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
         var medicine = await dbContext.Medicines
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .Include(x => x.Profile)
+            .FirstOrDefaultAsync(x => x.Id == id && viewableProfileIds.Contains(x.ProfileId));
 
         if (medicine is null)
         {
@@ -50,7 +66,7 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
 
         var stockEntries = await dbContext.StockEntries
             .AsNoTracking()
-            .Where(x => x.MedicineId == id)
+            .Where(x => x.MedicineId == id && x.ProfileId == medicine.ProfileId)
             .OrderByDescending(x => x.Date)
             .Select(x => new GetMedicineDetailsStockEntry
             {
@@ -64,11 +80,14 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
         var response = new GetMedicineDetailsResponse
         {
             Id = medicine.Id,
+            ProfileId = medicine.ProfileId,
+            ProfileName = medicine.Profile.Name,
             Name = medicine.Name,
             BoxSize = medicine.BoxSize,
             DailyConsumption = medicine.DailyConsumption,
             StockQuantity = medicine.StockQuantity,
             StockDate = medicine.StockDate == default ? null : medicine.StockDate,
+            CanEdit = await editableProfileIds.AnyAsync(x => x == medicine.ProfileId),
             StockEntries = stockEntries
         };
 
@@ -81,8 +100,9 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> CreateMedicineAsync([FromBody] CreateMedicineRequest request)
     {
-        var userId = contextUser.UserId;
-        if (userId is null)
+        await profileAccessService.EnsureCurrentUserInitializedAsync();
+
+        if (contextUser.UserId is null)
         {
             return Unauthorized();
         }
@@ -99,10 +119,22 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
             return ValidationProblem(ModelState);
         }
 
+        if (request.ProfileId == Guid.Empty)
+        {
+            ModelState.AddModelError(nameof(CreateMedicineRequest.ProfileId), "Profile is required.");
+            return ValidationProblem(ModelState);
+        }
+
+        var profile = await profileAccessService.GetAccessibleProfileAsync(request.ProfileId, ProfilePermission.Edit);
+        if (profile is null)
+        {
+            return NotFound();
+        }
+
         var medicine = new Medicine
         {
             Id = Guid.NewGuid(),
-            UserId = userId,
+            ProfileId = profile.Id,
             Name = name,
             BoxSize = request.BoxSize,
             DailyConsumption = request.DailyConsumption
@@ -114,6 +146,8 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
         var response = new CreateMedicineResponse
         {
             Id = medicine.Id,
+            ProfileId = profile.Id,
+            ProfileName = profile.Name,
             Name = medicine.Name,
             BoxSize = medicine.BoxSize,
             DailyConsumption = medicine.DailyConsumption
@@ -129,6 +163,8 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateMedicineAsync(Guid id, [FromBody] UpdateMedicineRequest request)
     {
+        await profileAccessService.EnsureCurrentUserInitializedAsync();
+
         if (!ModelState.IsValid)
         {
             return ValidationProblem(ModelState);
@@ -141,8 +177,10 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
             return ValidationProblem(ModelState);
         }
 
+        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
         var medicine = await dbContext.Medicines
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .Include(x => x.Profile)
+            .FirstOrDefaultAsync(x => x.Id == id && editableProfileIds.Contains(x.ProfileId));
 
         if (medicine is null)
         {
@@ -157,6 +195,8 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
         var response = new UpdateMedicineResponse
         {
             Id = medicine.Id,
+            ProfileId = medicine.ProfileId,
+            ProfileName = medicine.Profile.Name,
             Name = medicine.Name,
             BoxSize = medicine.BoxSize,
             DailyConsumption = medicine.DailyConsumption
@@ -171,8 +211,11 @@ public sealed class MedicinesController(ApplicationDbContext dbContext, IContext
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteMedicineAsync(Guid id)
     {
+        await profileAccessService.EnsureCurrentUserInitializedAsync();
+
+        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
         var medicine = await dbContext.Medicines
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.Id == id && editableProfileIds.Contains(x.ProfileId));
 
         if (medicine is null)
         {

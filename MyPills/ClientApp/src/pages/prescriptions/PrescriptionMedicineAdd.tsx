@@ -14,14 +14,14 @@ function PrescriptionMedicineAddContent() {
   const [consumedQuantity, setConsumedQuantity] = useState('0')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const { text } = useLanguage()
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [{ response: medicinesResponse, data: medicinesData }, { response: prescriptionResponse }] = await Promise.all([
-          requestJson<MedicinesResponse>('/api/medicines'),
+        const [{ response: medicinesResponse, data: medicinesData }, { response: prescriptionResponse, data: prescriptionData }] = await Promise.all([
+          requestJson<MedicinesResponse>('/api/medicines?editableOnly=true'),
           requestJson<PrescriptionDetails>(`/api/prescriptions/${id}`)
         ])
 
@@ -29,11 +29,11 @@ function PrescriptionMedicineAddContent() {
           throw new Error(text.medicines.failedList)
         }
 
-        if (!prescriptionResponse.ok) {
+        if (!prescriptionResponse.ok || !prescriptionData) {
           throw new Error(text.prescriptions.failedDetails)
         }
 
-        const items = medicinesData?.medicines ?? []
+        const items = (medicinesData?.medicines ?? []).filter(item => item.profileId === prescriptionData.profileId)
         setMedicines(items)
         setMedicineId(items[0]?.id ?? '')
       } catch (err) {
@@ -43,7 +43,7 @@ function PrescriptionMedicineAddContent() {
       }
     }
 
-    load()
+    void load()
   }, [id, text.common.loadingForm, text.medicines.failedList, text.prescriptions.failedDetails])
 
   const onSubmit = async event => {
@@ -111,13 +111,9 @@ function PrescriptionMedicineAddContent() {
       <div className="row">
         <div className="col-md-4">
           <form onSubmit={onSubmit}>
-            {error && <div className="text-danger mb-3">{error}</div>}
+            {error ? <div className="text-danger mb-3">{error}</div> : null}
             <div className="form-floating mb-3">
-              <select
-                className="form-select"
-                value={medicineId}
-                onChange={event => setMedicineId(event.target.value)}
-              >
+              <select className="form-select" value={medicineId} onChange={event => setMedicineId(event.target.value)}>
                 {medicines.map(item => (
                   <option key={item.id} value={item.id}>
                     {item.name}
@@ -127,27 +123,15 @@ function PrescriptionMedicineAddContent() {
               <label className="form-label">{text.prescriptions.medicine}</label>
             </div>
             <div className="form-floating mb-3">
-              <input
-                className="form-control"
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={event => setQuantity(event.target.value)}
-              />
+              <input className="form-control" type="number" min="1" value={quantity} onChange={event => setQuantity(event.target.value)} />
               <label className="form-label">{text.prescriptions.quantity}</label>
             </div>
             <div className="form-floating mb-3">
-              <input
-                className="form-control"
-                type="number"
-                min="0"
-                value={consumedQuantity}
-                onChange={event => setConsumedQuantity(event.target.value)}
-              />
+              <input className="form-control" type="number" min="0" value={consumedQuantity} onChange={event => setConsumedQuantity(event.target.value)} />
               <label className="form-label">{text.prescriptions.consumedQuantity}</label>
             </div>
             <div>
-              <button className="btn btn-primary" type="submit" disabled={saving}>
+              <button className="btn btn-primary" type="submit" disabled={saving || !medicineId}>
                 {saving ? `${text.common.save}...` : text.prescriptions.addMedicine}
               </button>
             </div>
@@ -168,4 +152,3 @@ export default function PrescriptionMedicineAdd() {
     </ProtectedRoute>
   )
 }
-

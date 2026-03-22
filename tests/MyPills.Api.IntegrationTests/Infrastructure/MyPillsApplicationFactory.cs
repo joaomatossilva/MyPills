@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
@@ -69,12 +68,24 @@ internal sealed class MyPillsApplicationFactory : WebApplicationFactory<Program>
         return host;
     }
 
-    public HttpClient CreateApiClient()
+    public HttpClient CreateApiClient(string? userId = null, string? userName = null)
     {
-        return CreateClient(new WebApplicationFactoryClientOptions
+        var client = CreateClient(new WebApplicationFactoryClientOptions
         {
             BaseAddress = new Uri("https://localhost")
         });
+
+        if (!string.IsNullOrWhiteSpace(userId))
+        {
+            client.DefaultRequestHeaders.Add(TestAuthenticationHandler.UserIdHeader, userId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(userName))
+        {
+            client.DefaultRequestHeaders.Add(TestAuthenticationHandler.UserNameHeader, userName);
+        }
+
+        return client;
     }
 
     public async Task SeedAsync(params object[] entities)
@@ -102,15 +113,54 @@ internal sealed class MyPillsApplicationFactory : WebApplicationFactory<Program>
         await action(dbContext);
     }
 
+    public async Task<Profile> GetDefaultProfileAsync(string? ownerUserId = null)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        var profile = await dbContext.Profiles
+            .AsNoTracking()
+            .FirstAsync(x => x.OwnerId == (ownerUserId ?? TestAuthenticationHandler.UserId) && x.IsDefault);
+
+        return profile;
+    }
+
+    public async Task SeedUserAsync(string userId, string userName, string shareCode)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        if (await dbContext.Users.AnyAsync(x => x.Id == userId))
+        {
+            return;
+        }
+
+        dbContext.Users.Add(new ApplicationUser
+        {
+            Id = userId,
+            UserName = userName,
+            NormalizedUserName = userName.ToUpperInvariant(),
+            Email = userName,
+            NormalizedEmail = userName.ToUpperInvariant(),
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString("N"),
+            ShareCode = shareCode
+        });
+
+        EnsureDefaultProfile(dbContext, userId);
+        await dbContext.SaveChangesAsync();
+    }
+
     private static void SeedAuthenticatedUser(ApplicationDbContext dbContext)
     {
         var existingUser = dbContext.Users.FirstOrDefault(x => x.Id == TestAuthenticationHandler.UserId);
         if (existingUser is not null)
         {
+            EnsureDefaultProfile(dbContext, existingUser.Id);
             return;
         }
 
-        dbContext.Users.Add(new IdentityUser
+        var user = new ApplicationUser
         {
             Id = TestAuthenticationHandler.UserId,
             UserName = TestAuthenticationHandler.UserName,
@@ -118,9 +168,29 @@ internal sealed class MyPillsApplicationFactory : WebApplicationFactory<Program>
             Email = TestAuthenticationHandler.UserName,
             NormalizedEmail = TestAuthenticationHandler.UserName.ToUpperInvariant(),
             EmailConfirmed = true,
-            SecurityStamp = Guid.NewGuid().ToString("N")
-        });
+            SecurityStamp = Guid.NewGuid().ToString("N"),
+            ShareCode = "Aa0001"
+        };
+
+        dbContext.Users.Add(user);
+        EnsureDefaultProfile(dbContext, user.Id);
 
         dbContext.SaveChanges();
+    }
+
+    private static void EnsureDefaultProfile(ApplicationDbContext dbContext, string ownerId)
+    {
+        if (dbContext.Profiles.Any(x => x.OwnerId == ownerId && x.IsDefault))
+        {
+            return;
+        }
+
+        dbContext.Profiles.Add(new Profile
+        {
+            Id = Guid.NewGuid(),
+            OwnerId = ownerId,
+            Name = "Default Profile",
+            IsDefault = true
+        });
     }
 }

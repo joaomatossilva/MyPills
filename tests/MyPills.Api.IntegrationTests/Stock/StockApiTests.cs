@@ -13,6 +13,7 @@ public sealed class StockApiTests
     {
         await using var factory = new MyPillsApplicationFactory();
         using var client = factory.CreateApiClient();
+        var defaultProfile = await factory.GetDefaultProfileAsync();
 
         // Arrange
         var prescriptionDate = DateOnly.FromDateTime(DateTime.Today);
@@ -23,7 +24,8 @@ public sealed class StockApiTests
             new
             {
                 name = "Amoxicillin",
-                boxSize = 10
+                boxSize = 10,
+                profileId = defaultProfile.Id
             });
         var medicine = await createMedicineResponse.ReadJsonAsync();
         var medicineId = medicine.GetProperty("id").GetGuid();
@@ -32,6 +34,7 @@ public sealed class StockApiTests
             "/api/prescriptions",
             new
             {
+                profileId = defaultProfile.Id,
                 date = prescriptionDate,
                 expiryDate
             });
@@ -76,6 +79,7 @@ public sealed class StockApiTests
     {
         await using var factory = new MyPillsApplicationFactory();
         using var client = factory.CreateApiClient();
+        var profile = await factory.GetDefaultProfileAsync();
 
         // Arrange
         var medicineId = Guid.NewGuid();
@@ -87,7 +91,7 @@ public sealed class StockApiTests
             new Medicine
             {
                 Id = medicineId,
-                UserId = TestAuthenticationHandler.UserId,
+                ProfileId = profile.Id,
                 Name = "Metformin",
                 BoxSize = 60,
                 StockDate = DateTimeOffset.UtcNow,
@@ -97,7 +101,7 @@ public sealed class StockApiTests
             new Prescription
             {
                 Id = firstPrescriptionId,
-                UserId = TestAuthenticationHandler.UserId,
+                ProfileId = profile.Id,
                 Date = today.AddDays(-10),
                 ExpiryDate = today.AddDays(20),
                 Medicines =
@@ -114,7 +118,7 @@ public sealed class StockApiTests
             new Prescription
             {
                 Id = secondPrescriptionId,
-                UserId = TestAuthenticationHandler.UserId,
+                ProfileId = profile.Id,
                 Date = today.AddDays(-5),
                 ExpiryDate = today.AddDays(25),
                 Medicines =

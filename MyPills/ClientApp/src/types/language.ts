@@ -10,6 +10,7 @@ export interface TranslationDictionary {
   languageName: string
   layout: {
     home: string
+    profiles: string
     medicines: string
     stock: string
     prescriptions: string
@@ -103,6 +104,7 @@ export interface TranslationDictionary {
     latestStocks: string
     addStockEntry: string
     name: string
+    profile: string
     boxSize: string
     dailyConsumption: string
     stockQuantity: string
@@ -138,6 +140,7 @@ export interface TranslationDictionary {
     entityLabel: string
     medicinesSection: string
     addMedicine: string
+    profile: string
     medicine: string
     date: string
     expiryDate: string
@@ -181,6 +184,7 @@ export interface TranslationDictionary {
     detailsTitle: string
     deductionsTitle: string
     notFound: string
+    profile: string
     medicine: string
     date: string
     quantity: string
@@ -202,6 +206,43 @@ export interface TranslationDictionary {
       quantityPositive: string
       typeRequired: string
       deductionQuantityNonNegative: string
+    }
+  }
+  profiles: {
+    title: string
+    add: string
+    createTitle: string
+    editTitle: string
+    detailsTitle: string
+    ownedSection: string
+    sharedSection: string
+    yourCode: string
+    regenerateCode: string
+    owner: string
+    permission: string
+    sharedWith: string
+    isDefault: string
+    emptyOwned: string
+    emptyShared: string
+    noShares: string
+    shareProfile: string
+    userCode: string
+    viewPermission: string
+    editPermission: string
+    failedList: string
+    failedDetails: string
+    failedCreate: string
+    failedUpdate: string
+    failedShare: string
+    failedRevoke: string
+    failedCode: string
+    name: string
+    shareCount: string
+    validation: {
+      nameRequired: string
+      userCodeRequired: string
+      userCodeInvalid: string
+      permissionRequired: string
     }
   }
 }

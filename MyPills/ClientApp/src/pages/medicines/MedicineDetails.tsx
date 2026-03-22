@@ -50,12 +50,18 @@ function MedicineDetailsContent() {
     <div className="container my-5">
       <h2 className="mb-4">
         {text.medicines.detailsTitle}{' '}
-        <Link to={`/medicines/${id}/edit`}>
-          <i className="fa-regular fa-pen-to-square"></i>
-        </Link>
+        {medicine.canEdit ? (
+          <Link to={`/medicines/${id}/edit`}>
+            <i className="fa-regular fa-pen-to-square"></i>
+          </Link>
+        ) : null}
       </h2>
 
       <dl className="row mb-5">
+        <dt className="col-sm-2">{text.medicines.profile}</dt>
+        <dd className="col-sm-10">
+          <Link to={`/profiles/${medicine.profileId}`}>{medicine.profileName}</Link>
+        </dd>
         <dt className="col-sm-2">{text.medicines.name}</dt>
         <dd className="col-sm-10">{medicine.name}</dd>
         <dt className="col-sm-2">{text.medicines.boxSize}</dt>
@@ -71,11 +77,13 @@ function MedicineDetailsContent() {
       </dl>
 
       <h2 className="mb-4">{text.medicines.latestStocks}</h2>
-      <p>
-        <Link className="btn btn-success" to={`/stock/new?medicineId=${id}`}>
-          <i className="fa-solid fa-plus"></i> <span>{text.medicines.addStockEntry}</span>
-        </Link>
-      </p>
+      {medicine.canEdit ? (
+        <p>
+          <Link className="btn btn-success" to={`/stock/new?medicineId=${id}`}>
+            <i className="fa-solid fa-plus"></i> <span>{text.medicines.addStockEntry}</span>
+          </Link>
+        </p>
+      ) : null}
 
       {stockEntries.length === 0 ? (
         <div className="alert alert-info">{text.stock.empty}</div>

@@ -7,6 +7,10 @@ import MedicineCreate from './pages/medicines/MedicineCreate'
 import MedicineDetails from './pages/medicines/MedicineDetails'
 import MedicineEdit from './pages/medicines/MedicineEdit'
 import MedicineDelete from './pages/medicines/MedicineDelete'
+import ProfilesList from './pages/profiles/ProfilesList'
+import ProfileCreate from './pages/profiles/ProfileCreate'
+import ProfileDetails from './pages/profiles/ProfileDetails'
+import ProfileEdit from './pages/profiles/ProfileEdit'
 import PrescriptionsList from './pages/prescriptions/PrescriptionsList'
 import PrescriptionCreate from './pages/prescriptions/PrescriptionCreate'
 import PrescriptionDetails from './pages/prescriptions/PrescriptionDetails'
@@ -34,6 +38,10 @@ function App() {
             <Route element={<Layout />}>
               <Route path="overview" element={<Overview />} />
               <Route path="test" element={<Test />} />
+              <Route path="profiles" element={<ProfilesList />} />
+              <Route path="profiles/new" element={<ProfileCreate />} />
+              <Route path="profiles/:id" element={<ProfileDetails />} />
+              <Route path="profiles/:id/edit" element={<ProfileEdit />} />
               <Route path="medicines" element={<MedicinesList />} />
               <Route path="medicines/new" element={<MedicineCreate />} />
               <Route path="medicines/:id" element={<MedicineDetails />} />

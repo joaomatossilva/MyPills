@@ -16,13 +16,13 @@ function StockCreateContent() {
   const [type, setType] = useState('1')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const { text } = useLanguage()
 
   useEffect(() => {
     const load = async () => {
       try {
-        const { response, data } = await requestJson<MedicinesResponse>('/api/medicines')
+        const { response, data } = await requestJson<MedicinesResponse>('/api/medicines?editableOnly=true')
         if (!response.ok) {
           throw new Error(text.medicines.failedList)
         }
@@ -37,7 +37,7 @@ function StockCreateContent() {
       }
     }
 
-    load()
+    void load()
   }, [text.medicines.failedList, text.stock.failedLoadForm])
 
   const onSubmit = async event => {
@@ -78,7 +78,7 @@ function StockCreateContent() {
         return
       }
 
-      if (data.requiresPrescriptionDeduction) {
+      if (data?.requiresPrescriptionDeduction) {
         navigate(`/stock/deductions?medicineId=${data.medicineId}&boxes=${data.deductionBoxes}`)
         return
       }
@@ -105,37 +105,23 @@ function StockCreateContent() {
       <div className="row">
         <div className="col-md-4">
           <form onSubmit={onSubmit}>
-            {error && <div className="text-danger mb-3">{error}</div>}
+            {error ? <div className="text-danger mb-3">{error}</div> : null}
             <div className="form-floating mb-3">
-              <select
-                className="form-select"
-                value={medicineId}
-                onChange={event => setMedicineId(event.target.value)}
-              >
+              <select className="form-select" value={medicineId} onChange={event => setMedicineId(event.target.value)}>
                 {medicines.map(item => (
                   <option key={item.id} value={item.id}>
-                    {item.name}
+                    {item.name} ({item.profileName})
                   </option>
                 ))}
               </select>
               <label className="form-label">{text.stock.medicine}</label>
             </div>
             <div className="form-floating mb-3">
-              <input
-                className="form-control"
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={event => setQuantity(event.target.value)}
-              />
+              <input className="form-control" type="number" min="1" value={quantity} onChange={event => setQuantity(event.target.value)} />
               <label className="form-label">{text.stock.quantity}</label>
             </div>
             <div className="form-floating mb-3">
-              <select
-                className="form-select"
-                value={type}
-                onChange={event => setType(event.target.value)}
-              >
+              <select className="form-select" value={type} onChange={event => setType(event.target.value)}>
                 <option value="1">{text.stock.box}</option>
                 <option value="2">{text.stock.increase}</option>
                 <option value="3">{text.stock.decrease}</option>
@@ -144,7 +130,7 @@ function StockCreateContent() {
               <label className="form-label">{text.stock.type}</label>
             </div>
             <div className="form-floating">
-              <button className="w-100 btn btn-lg btn-primary" type="submit" disabled={saving}>
+              <button className="w-100 btn btn-lg btn-primary" type="submit" disabled={saving || !medicineId}>
                 {saving ? `${text.common.create}...` : text.common.create}
               </button>
             </div>
@@ -165,4 +151,3 @@ export default function StockCreate() {
     </ProtectedRoute>
   )
 }
-

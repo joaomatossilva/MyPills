@@ -1,16 +1,13 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Identity;
-
 namespace MyPills.Data;
 
 public class StockEntry
 {
     public Guid Id { get; set; }
     public Guid MedicineId { get; set; }
-    public virtual Medicine Medicine { get; set; }
-    [Required]
-    public string UserId { get; set; }
-    public virtual IdentityUser User { get; set; }
+    public Medicine Medicine { get; set; } = null!;
+    public Guid ProfileId { get; set; }
+    public Profile Profile { get; set; } = null!;
     [DisplayFormat(DataFormatString = "{0:d}")]
     public DateTimeOffset Date { get; set; }
     public int Quantity { get; set; }

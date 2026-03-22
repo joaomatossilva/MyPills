@@ -10,7 +10,7 @@ import type { StockEntriesResponse, StockEntryListItem } from '../../types/api'
 function StockListContent() {
   const [stockEntries, setStockEntries] = useState<StockEntryListItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const { text, locale } = useLanguage()
 
   useEffect(() => {
@@ -29,7 +29,7 @@ function StockListContent() {
       }
     }
 
-    load()
+    void load()
   }, [text.stock.failedList])
 
   if (loading) {
@@ -55,6 +55,7 @@ function StockListContent() {
         <table className="table table-striped">
           <thead>
             <tr>
+              <th>{text.stock.profile}</th>
               <th>{text.stock.medicine}</th>
               <th>{text.stock.date}</th>
               <th>{text.stock.quantity}</th>
@@ -64,6 +65,7 @@ function StockListContent() {
           <tbody>
             {stockEntries.map(item => (
               <tr key={item.id}>
+                <td>{item.profileName}</td>
                 <td>
                   <Link to={`/stock/${item.id}`}>{item.medicineName}</Link>
                 </td>
@@ -86,4 +88,3 @@ export default function StockList() {
     </ProtectedRoute>
   )
 }
-

@@ -13,15 +13,19 @@ internal sealed class TestAuthenticationHandler(
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     public const string SchemeName = "IntegrationTest";
+    public const string UserIdHeader = "X-Test-UserId";
+    public const string UserNameHeader = "X-Test-UserName";
     public const string UserId = "integration-test-user-id";
     public const string UserName = "integration.user@example.com";
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
+        var requestUserId = Request.Headers[UserIdHeader].FirstOrDefault() ?? UserId;
+        var requestUserName = Request.Headers[UserNameHeader].FirstOrDefault() ?? UserName;
         var claims = new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, UserId),
-            new Claim(ClaimTypes.Name, UserName)
+            new Claim(ClaimTypes.NameIdentifier, requestUserId),
+            new Claim(ClaimTypes.Name, requestUserName)
         };
 
         var identity = new ClaimsIdentity(claims, SchemeName);

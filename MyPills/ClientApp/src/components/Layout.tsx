@@ -173,6 +173,12 @@ export default function Layout() {
                     <p>{text.layout.home}</p>
                   </NavLink>
                 </li>
+                 <li className="nav-item">
+                  <NavLink to="/profiles" className={getNavLinkClass} onClick={closeMobileSidebar}>
+                    <i className="nav-icon bi bi-download"></i>
+                    <p>{text.layout.profiles}</p>
+                  </NavLink>
+                </li>
                 <li className="nav-item">
                   <NavLink to="/medicines" className={getNavLinkClass} onClick={closeMobileSidebar}>
                     <i className="nav-icon bi bi-download"></i>

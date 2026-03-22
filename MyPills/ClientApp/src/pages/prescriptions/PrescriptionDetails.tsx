@@ -4,18 +4,19 @@ import ProtectedRoute from '../../components/ProtectedRoute'
 import { requestJson } from '../../api/apiClient'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { formatDateOnly } from '../../utils/dateFormatting'
+import type { PrescriptionDetails as PrescriptionDetailsModel } from '../../types/api'
 
 function PrescriptionDetailsContent() {
   const { id } = useParams()
-  const [prescription, setPrescription] = useState(null)
+  const [prescription, setPrescription] = useState<PrescriptionDetailsModel | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const { text, locale } = useLanguage()
 
   useEffect(() => {
     const load = async () => {
       try {
-        const { response, data } = await requestJson(`/api/prescriptions/${id}`)
+        const { response, data } = await requestJson<PrescriptionDetailsModel>(`/api/prescriptions/${id}`)
         if (!response.ok) {
           throw new Error(text.prescriptions.failedDetails)
         }
@@ -28,7 +29,7 @@ function PrescriptionDetailsContent() {
       }
     }
 
-    load()
+    void load()
   }, [id, text.prescriptions.failedDetails])
 
   if (loading) {
@@ -47,12 +48,18 @@ function PrescriptionDetailsContent() {
     <div className="container my-5">
       <h2 className="mb-4">
         {text.prescriptions.detailsTitle}{' '}
-        <Link to={`/prescriptions/${id}/edit`}>
-          <i className="fa-regular fa-pen-to-square"></i>
-        </Link>
+        {prescription.canEdit ? (
+          <Link to={`/prescriptions/${id}/edit`}>
+            <i className="fa-regular fa-pen-to-square"></i>
+          </Link>
+        ) : null}
       </h2>
 
       <dl className="row mb-5">
+        <dt className="col-sm-2">{text.prescriptions.profile}</dt>
+        <dd className="col-sm-10">
+          <Link to={`/profiles/${prescription.profileId}`}>{prescription.profileName}</Link>
+        </dd>
         <dt className="col-sm-2">{text.prescriptions.date}</dt>
         <dd className="col-sm-10">{formatDateOnly(prescription.date, locale)}</dd>
         <dt className="col-sm-2">{text.prescriptions.expiryDate}</dt>
@@ -60,11 +67,13 @@ function PrescriptionDetailsContent() {
       </dl>
 
       <h2 className="mb-4">{text.prescriptions.medicinesSection}</h2>
-      <p>
-        <Link to={`/prescriptions/${id}/medicines/add`} className="btn btn-success">
-          <i className="fa-solid fa-plus"></i> <span>{text.prescriptions.addMedicine}</span>
-        </Link>
-      </p>
+      {prescription.canEdit ? (
+        <p>
+          <Link to={`/prescriptions/${id}/medicines/add`} className="btn btn-success">
+            <i className="fa-solid fa-plus"></i> <span>{text.prescriptions.addMedicine}</span>
+          </Link>
+        </p>
+      ) : null}
 
       {prescription.medicines?.length > 0 ? (
         <table className="table table-striped">
@@ -83,12 +92,16 @@ function PrescriptionDetailsContent() {
                 <td>{item.quantity}</td>
                 <td>{item.consumedQuantity}</td>
                 <td className="text-end">
-                  <Link to={`/prescriptions/${id}/medicines/${item.medicineId}/edit`} className="me-3">
-                    {text.common.edit}
-                  </Link>
-                  <Link to={`/prescriptions/${id}/medicines/${item.medicineId}/delete`} className="link-danger">
-                    {text.common.delete}
-                  </Link>
+                  {prescription.canEdit ? (
+                    <>
+                      <Link to={`/prescriptions/${id}/medicines/${item.medicineId}/edit`} className="me-3">
+                        {text.common.edit}
+                      </Link>
+                      <Link to={`/prescriptions/${id}/medicines/${item.medicineId}/delete`} className="link-danger">
+                        {text.common.delete}
+                      </Link>
+                    </>
+                  ) : null}
                 </td>
               </tr>
             ))}
@@ -112,4 +125,3 @@ export default function PrescriptionDetails() {
     </ProtectedRoute>
   )
 }
-

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MyPills;
 using MyPills.Data;
+using MyPills.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IContextUser, HttpContextUser>();
+builder.Services.AddScoped<ProfileAccessService>();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddLocalization();
 
@@ -37,7 +39,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     });
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages(opt =>
 {
@@ -46,8 +48,8 @@ builder.Services.AddRazorPages(opt =>
 builder.Services.AddAuthentication()
     .AddGoogle(opt =>
     {
-        opt.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-        opt.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+        opt.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
+        opt.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
     });
 
 var app = builder.Build();
@@ -70,6 +72,7 @@ app.UseRequestLocalization();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Map API controllers and Razor Pages at root level

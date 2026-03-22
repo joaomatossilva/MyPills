@@ -53,6 +53,7 @@ function MedicinesListContent() {
         <table className="table table-striped">
           <thead>
             <tr>
+              <th>{text.medicines.profile}</th>
               <th>{text.medicines.name}</th>
               <th>{text.medicines.boxSize}</th>
               <th>{text.medicines.dailyConsumption}</th>
@@ -62,18 +63,23 @@ function MedicinesListContent() {
           <tbody>
             {medicines.map(item => (
               <tr key={item.id}>
+                <td>{item.profileName}</td>
                 <td>
                   <Link to={`/medicines/${item.id}`}>{item.name}</Link>
                 </td>
                 <td>{item.boxSize}</td>
                 <td>{item.dailyConsumption}</td>
                 <td className="text-end">
-                  <Link to={`/medicines/${item.id}/edit`} className="me-3">
-                    <i className="fa-regular fa-pen-to-square"></i>
-                  </Link>
-                  <Link to={`/medicines/${item.id}/delete`} className="link-danger">
-                    <i className="fa-solid fa-xmark"></i>
-                  </Link>
+                  {item.canEdit ? (
+                    <>
+                      <Link to={`/medicines/${item.id}/edit`} className="me-3">
+                        <i className="fa-regular fa-pen-to-square"></i>
+                      </Link>
+                      <Link to={`/medicines/${item.id}/delete`} className="link-danger">
+                        <i className="fa-solid fa-xmark"></i>
+                      </Link>
+                    </>
+                  ) : null}
                 </td>
               </tr>
             ))}

@@ -2,22 +2,27 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyPills.Data;
+using MyPills.Services;
 
 namespace MyPills.Controllers.Overview;
 
 [ApiController]
 [Route("api/overview")]
 [Authorize]
-public sealed class OverviewController(ApplicationDbContext dbContext) : ControllerBase
+public sealed class OverviewController(ApplicationDbContext dbContext, ProfileAccessService profileAccessService) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType(typeof(GetOverviewResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAsync()
     {
+        await profileAccessService.EnsureCurrentUserInitializedAsync();
+
         var today = DateTime.Today;
+        var accessibleProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View).Select(x => x.Id);
         var medicines = await dbContext.Medicines
             .Include(x => x.Prescriptions)
             .ThenInclude(x => x.Prescription)
+            .Where(x => accessibleProfileIds.Contains(x.ProfileId))
             .AsSplitQuery()
             .ToListAsync();
 

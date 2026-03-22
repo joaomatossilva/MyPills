@@ -3,36 +3,47 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyPills;
 using MyPills.Data;
+using MyPills.Services;
 
 namespace MyPills.Controllers.Stock;
 
 [ApiController]
 [Route("api/stock")]
 [Authorize]
-public sealed class StockController(ApplicationDbContext dbContext, IContextUser contextUser) : ControllerBase
+public sealed class StockController(ApplicationDbContext dbContext, IContextUser contextUser, ProfileAccessService profileAccessService) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType(typeof(GetStockEntriesResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetStockEntriesAsync()
     {
+        await profileAccessService.EnsureCurrentUserInitializedAsync();
+
+        var viewableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View).Select(x => x.Id);
+        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
         var stockEntries = await dbContext.StockEntries
             .AsNoTracking()
             .Include(x => x.Medicine)
+            .Include(x => x.Profile)
+            .Where(x => viewableProfileIds.Contains(x.ProfileId))
             .OrderByDescending(x => x.Date)
+            .Select(x => new GetStockEntriesItem
+            {
+                Id = x.Id,
+                MedicineId = x.MedicineId,
+                ProfileId = x.ProfileId,
+                ProfileName = x.Profile.Name,
+                MedicineName = x.Medicine.Name,
+                Date = x.Date,
+                Quantity = x.Quantity,
+                Type = x.Type.ToString(),
+                CanEdit = editableProfileIds.Contains(x.ProfileId)
+            })
             .ToListAsync();
 
         return Ok(new GetStockEntriesResponse
         {
-            StockEntries = stockEntries.Select(x => new GetStockEntriesItem
-            {
-                Id = x.Id,
-                MedicineId = x.MedicineId,
-                MedicineName = x.Medicine.Name,
-                Date = x.Date,
-                Quantity = x.Quantity,
-                Type = x.Type.ToString()
-            }).ToList()
+            StockEntries = stockEntries
         });
     }
 
@@ -42,10 +53,15 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetStockEntryDetailsAsync(Guid id)
     {
+        await profileAccessService.EnsureCurrentUserInitializedAsync();
+
+        var viewableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.View).Select(x => x.Id);
+        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
         var stockEntry = await dbContext.StockEntries
             .AsNoTracking()
             .Include(x => x.Medicine)
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .Include(x => x.Profile)
+            .FirstOrDefaultAsync(x => x.Id == id && viewableProfileIds.Contains(x.ProfileId));
 
         if (stockEntry is null)
         {
@@ -56,10 +72,13 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
         {
             Id = stockEntry.Id,
             MedicineId = stockEntry.MedicineId,
+            ProfileId = stockEntry.ProfileId,
+            ProfileName = stockEntry.Profile.Name,
             MedicineName = stockEntry.Medicine.Name,
             Date = stockEntry.Date,
             Quantity = stockEntry.Quantity,
-            Type = stockEntry.Type.ToString()
+            Type = stockEntry.Type.ToString(),
+            CanEdit = await editableProfileIds.AnyAsync(x => x == stockEntry.ProfileId)
         });
     }
 
@@ -70,8 +89,9 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CreateStockEntryAsync([FromBody] CreateStockEntryRequest request)
     {
-        var userId = contextUser.UserId;
-        if (userId is null)
+        await profileAccessService.EnsureCurrentUserInitializedAsync();
+
+        if (contextUser.UserId is null)
         {
             return Unauthorized();
         }
@@ -87,8 +107,10 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
             return ValidationProblem(ModelState);
         }
 
+        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
         var medicine = await dbContext.Medicines
-            .FirstOrDefaultAsync(x => x.Id == request.MedicineId);
+            .Include(x => x.Profile)
+            .FirstOrDefaultAsync(x => x.Id == request.MedicineId && editableProfileIds.Contains(x.ProfileId));
 
         if (medicine is null)
         {
@@ -110,9 +132,9 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
         var stockEntry = new StockEntry
         {
             Id = Guid.NewGuid(),
-            UserId = userId,
             Date = now,
             MedicineId = request.MedicineId,
+            ProfileId = medicine.ProfileId,
             Quantity = request.Quantity,
             Type = request.Type
         };
@@ -124,7 +146,8 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
             && await dbContext.Prescriptions
                 .AsNoTracking()
                 .AnyAsync(x =>
-                    x.ExpiryDate > today
+                    x.ProfileId == medicine.ProfileId
+                    && x.ExpiryDate > today
                     && x.Medicines.Any(m => m.MedicineId == request.MedicineId && m.Quantity > m.ConsumedQuantity));
 
         return Created(
@@ -133,6 +156,8 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
             {
                 Id = stockEntry.Id,
                 MedicineId = stockEntry.MedicineId,
+                ProfileId = stockEntry.ProfileId,
+                ProfileName = medicine.Profile.Name,
                 Date = stockEntry.Date,
                 Quantity = stockEntry.Quantity,
                 Type = stockEntry.Type.ToString(),
@@ -157,8 +182,11 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
     [ProducesResponseType(typeof(GetStockDeductionPreviewResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetStockDeductionPreviewAsync([FromQuery] GetStockDeductionPreviewRequest request)
     {
+        await profileAccessService.EnsureCurrentUserInitializedAsync();
+
         if (!ModelState.IsValid)
         {
             return ValidationProblem(ModelState);
@@ -170,13 +198,24 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
             return ValidationProblem(ModelState);
         }
 
+        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
+        var medicine = await dbContext.Medicines
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == request.MedicineId && editableProfileIds.Contains(x.ProfileId));
+
+        if (medicine is null)
+        {
+            return NotFound();
+        }
+
         var boxes = request.Boxes;
         var today = DateTime.Today;
         var prescriptions = await dbContext.Prescriptions
             .AsNoTracking()
             .Include(x => x.Medicines)
             .Where(x =>
-                x.ExpiryDate > today
+                x.ProfileId == medicine.ProfileId
+                && x.ExpiryDate > today
                 && x.Medicines.Any(m => m.MedicineId == request.MedicineId && m.Quantity > m.ConsumedQuantity))
             .OrderBy(x => x.Date)
             .ToListAsync();
@@ -215,8 +254,11 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
     [ProducesResponseType(typeof(ApplyStockDeductionResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ApplyStockDeductionAsync([FromBody] ApplyStockDeductionRequest request)
     {
+        await profileAccessService.EnsureCurrentUserInitializedAsync();
+
         if (!ModelState.IsValid)
         {
             return ValidationProblem(ModelState);
@@ -248,6 +290,16 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
             return ValidationProblem(ModelState);
         }
 
+        var editableProfileIds = profileAccessService.QueryAccessibleProfiles(ProfilePermission.Edit).Select(x => x.Id);
+        var medicine = await dbContext.Medicines
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == request.MedicineId && editableProfileIds.Contains(x.ProfileId));
+
+        if (medicine is null)
+        {
+            return NotFound();
+        }
+
         var prescriptionIds = request.Prescriptions
             .Select(x => x.PrescriptionId)
             .Distinct()
@@ -255,7 +307,7 @@ public sealed class StockController(ApplicationDbContext dbContext, IContextUser
 
         var prescriptions = await dbContext.Prescriptions
             .Include(x => x.Medicines)
-            .Where(x => prescriptionIds.Contains(x.Id))
+            .Where(x => prescriptionIds.Contains(x.Id) && x.ProfileId == medicine.ProfileId && editableProfileIds.Contains(x.ProfileId))
             .ToListAsync();
 
         if (prescriptions.Count != prescriptionIds.Length)

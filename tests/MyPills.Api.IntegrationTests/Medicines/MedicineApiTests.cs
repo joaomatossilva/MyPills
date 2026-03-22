@@ -12,13 +12,15 @@ public sealed class MedicineApiTests
     {
         await using var factory = new MyPillsApplicationFactory();
         using var client = factory.CreateApiClient();
+        var defaultProfile = await factory.GetDefaultProfileAsync();
 
         // Arrange
         var request = new
         {
             name = "Aspirin",
             boxSize = 20,
-            dailyConsumption = 2
+            dailyConsumption = 2,
+            profileId = defaultProfile.Id
         };
 
         // Act
@@ -40,12 +42,15 @@ public sealed class MedicineApiTests
         Assert.Equal("Aspirin", createdMedicine.GetProperty("name").GetString());
         Assert.Equal(20, createdMedicine.GetProperty("boxSize").GetInt32());
         Assert.Equal(2, createdMedicine.GetProperty("dailyConsumption").GetInt32());
+        Assert.Equal(defaultProfile.Id, createdMedicine.GetProperty("profileId").GetGuid());
         Assert.Equal(medicineId, listedMedicine.GetProperty("id").GetGuid());
         Assert.Equal(2, listedMedicine.GetProperty("dailyConsumption").GetInt32());
+        Assert.Equal(defaultProfile.Id, listedMedicine.GetProperty("profileId").GetGuid());
         Assert.Equal(medicineId, medicineDetails.GetProperty("id").GetGuid());
         Assert.Equal("Aspirin", medicineDetails.GetProperty("name").GetString());
         Assert.Equal(20, medicineDetails.GetProperty("boxSize").GetInt32());
         Assert.Equal(2, medicineDetails.GetProperty("dailyConsumption").GetInt32());
+        Assert.Equal(defaultProfile.Id, medicineDetails.GetProperty("profileId").GetGuid());
         Assert.Equal(0, medicineDetails.GetProperty("stockQuantity").GetInt32());
         Assert.Equal(0, medicineDetails.GetProperty("stockEntries").GetArrayLength());
     }
@@ -55,11 +60,13 @@ public sealed class MedicineApiTests
     {
         await using var factory = new MyPillsApplicationFactory();
         using var client = factory.CreateApiClient();
+        var defaultProfile = await factory.GetDefaultProfileAsync();
 
         var request = new
         {
             name = "Ibuprofen",
-            boxSize = 10
+            boxSize = 10,
+            profileId = defaultProfile.Id
         };
 
         using var response = await client.PostAsJsonAsync("/api/medicines", request);
@@ -76,11 +83,12 @@ public sealed class MedicineApiTests
         using var client = factory.CreateApiClient();
 
         var medicineId = Guid.NewGuid();
+        var profile = await factory.GetDefaultProfileAsync();
 
         await factory.SeedAsync(new Medicine
         {
             Id = medicineId,
-            UserId = TestAuthenticationHandler.UserId,
+            ProfileId = profile.Id,
             Name = "Magnesium",
             BoxSize = 30,
             DailyConsumption = 1,
@@ -104,6 +112,7 @@ public sealed class MedicineApiTests
         Assert.Equal(HttpStatusCode.OK, detailsResponse.StatusCode);
         Assert.Equal(60, updatedMedicine.GetProperty("boxSize").GetInt32());
         Assert.Equal(3, updatedMedicine.GetProperty("dailyConsumption").GetInt32());
+        Assert.Equal(profile.Id, updatedMedicine.GetProperty("profileId").GetGuid());
         Assert.Equal(60, detailsPayload.GetProperty("boxSize").GetInt32());
         Assert.Equal(3, detailsPayload.GetProperty("dailyConsumption").GetInt32());
     }

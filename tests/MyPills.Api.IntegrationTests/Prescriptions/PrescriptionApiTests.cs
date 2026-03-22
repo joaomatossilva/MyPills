@@ -11,6 +11,7 @@ public sealed class PrescriptionApiTests
     {
         await using var factory = new MyPillsApplicationFactory();
         using var client = factory.CreateApiClient();
+        var defaultProfile = await factory.GetDefaultProfileAsync();
 
         // Arrange
         var prescriptionDate = DateOnly.FromDateTime(DateTime.Today);
@@ -21,7 +22,8 @@ public sealed class PrescriptionApiTests
             new
             {
                 name = "Ibuprofen",
-                boxSize = 30
+                boxSize = 30,
+                profileId = defaultProfile.Id
             });
         var medicine = await createMedicineResponse.ReadJsonAsync();
         var medicineId = medicine.GetProperty("id").GetGuid();
@@ -31,6 +33,7 @@ public sealed class PrescriptionApiTests
             "/api/prescriptions",
             new
             {
+                profileId = defaultProfile.Id,
                 date = prescriptionDate,
                 expiryDate
             });
@@ -57,8 +60,10 @@ public sealed class PrescriptionApiTests
         Assert.Equal(HttpStatusCode.OK, detailsResponse.StatusCode);
         Assert.Equal(prescriptionDate.ToString("yyyy-MM-dd"), createdPrescription.GetProperty("date").GetString());
         Assert.Equal(expiryDate.ToString("yyyy-MM-dd"), createdPrescription.GetProperty("expiryDate").GetString());
+        Assert.Equal(defaultProfile.Id, createdPrescription.GetProperty("profileId").GetGuid());
         Assert.Equal(prescriptionId, addedMedicine.GetProperty("prescriptionId").GetGuid());
         Assert.Equal(medicineId, addedMedicine.GetProperty("medicineId").GetGuid());
+        Assert.Equal(defaultProfile.Id, prescriptionDetails.GetProperty("profileId").GetGuid());
         Assert.Equal("Ibuprofen", prescriptionMedicine.GetProperty("medicineName").GetString());
         Assert.Equal(30, prescriptionMedicine.GetProperty("boxSize").GetInt32());
         Assert.Equal(3, prescriptionMedicine.GetProperty("quantity").GetInt32());

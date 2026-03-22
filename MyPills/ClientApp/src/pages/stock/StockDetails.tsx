@@ -5,18 +5,19 @@ import { requestJson } from '../../api/apiClient'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { formatDateTime } from '../../utils/dateFormatting'
 import { getStockEntryTypeLabel } from '../../utils/stockEntryTypeLabels'
+import type { StockEntryDetails } from '../../types/api'
 
 function StockDetailsContent() {
   const { id } = useParams()
-  const [stockEntry, setStockEntry] = useState(null)
+  const [stockEntry, setStockEntry] = useState<StockEntryDetails | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const { text, locale } = useLanguage()
 
   useEffect(() => {
     const load = async () => {
       try {
-        const { response, data } = await requestJson(`/api/stock/${id}`)
+        const { response, data } = await requestJson<StockEntryDetails>(`/api/stock/${id}`)
         if (!response.ok) {
           throw new Error(text.stock.failedDetails)
         }
@@ -29,7 +30,7 @@ function StockDetailsContent() {
       }
     }
 
-    load()
+    void load()
   }, [id, text.stock.failedDetails])
 
   if (loading) {
@@ -48,6 +49,10 @@ function StockDetailsContent() {
     <div className="container my-5">
       <h2 className="mb-4">{text.stock.detailsTitle}</h2>
       <dl className="row mb-5">
+        <dt className="col-sm-2">{text.stock.profile}</dt>
+        <dd className="col-sm-10">
+          <Link to={`/profiles/${stockEntry.profileId}`}>{stockEntry.profileName}</Link>
+        </dd>
         <dt className="col-sm-2">{text.stock.medicine}</dt>
         <dd className="col-sm-10">{stockEntry.medicineName}</dd>
         <dt className="col-sm-2">{text.stock.date}</dt>
@@ -72,4 +77,3 @@ export default function StockDetails() {
     </ProtectedRoute>
   )
 }
-

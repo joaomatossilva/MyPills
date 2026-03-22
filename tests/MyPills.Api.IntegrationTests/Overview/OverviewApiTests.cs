@@ -11,6 +11,7 @@ public sealed class OverviewApiTests
     {
         await using var factory = new MyPillsApplicationFactory();
         using var client = factory.CreateApiClient();
+        var profile = await factory.GetDefaultProfileAsync();
 
         // Arrange
         var medicineId = Guid.NewGuid();
@@ -21,7 +22,7 @@ public sealed class OverviewApiTests
             new Medicine
             {
                 Id = medicineId,
-                UserId = TestAuthenticationHandler.UserId,
+                ProfileId = profile.Id,
                 Name = "Vitamin D",
                 BoxSize = 30,
                 DailyConsumption = 2,
@@ -32,7 +33,7 @@ public sealed class OverviewApiTests
             new Prescription
             {
                 Id = prescriptionId,
-                UserId = TestAuthenticationHandler.UserId,
+                ProfileId = profile.Id,
                 Date = DateTime.Today.AddDays(-4),
                 ExpiryDate = DateTime.Today.AddDays(20),
                 Medicines =

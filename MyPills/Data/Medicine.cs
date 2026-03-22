@@ -1,15 +1,13 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Identity;
-
 namespace MyPills.Data;
 
 public class Medicine
 {
     public Guid Id { get; set; } = Guid.Empty;
-    
-    public string UserId { get; set; }
-    public virtual IdentityUser User { get; set; }
-    
+
+    public Guid ProfileId { get; set; }
+    public Profile Profile { get; set; } = null!;
+
     [MaxLength(100)]
     public string Name { get; set; } = string.Empty;
 
@@ -20,5 +18,5 @@ public class Medicine
     public DateTimeOffset StockDate { get; set; }
     public int StockQuantity { get; set; }
     
-    public ICollection<PrescribedMedicine> Prescriptions { get; set; }
+    public ICollection<PrescribedMedicine> Prescriptions { get; set; } = [];
 }

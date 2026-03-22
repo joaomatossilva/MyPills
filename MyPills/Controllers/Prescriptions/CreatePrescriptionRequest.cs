@@ -9,5 +9,8 @@ public sealed class CreatePrescriptionRequest
 
     [Required]
     public DateOnly? ExpiryDate { get; init; }
+
+    [Required]
+    public Guid ProfileId { get; init; }
 }
 

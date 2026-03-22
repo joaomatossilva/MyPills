@@ -9,7 +9,7 @@ import type { PrescriptionListItem, PrescriptionsResponse } from '../../types/ap
 function PrescriptionsListContent() {
   const [prescriptions, setPrescriptions] = useState<PrescriptionListItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const { text, locale } = useLanguage()
 
   useEffect(() => {
@@ -28,7 +28,7 @@ function PrescriptionsListContent() {
       }
     }
 
-    load()
+    void load()
   }, [text.prescriptions.failedList])
 
   if (loading) {
@@ -54,6 +54,7 @@ function PrescriptionsListContent() {
         <table className="table table-striped">
           <thead>
             <tr>
+              <th>{text.prescriptions.profile}</th>
               <th>{text.prescriptions.date}</th>
               <th>{text.prescriptions.expiryDate}</th>
               <th></th>
@@ -62,17 +63,22 @@ function PrescriptionsListContent() {
           <tbody>
             {prescriptions.map(item => (
               <tr key={item.id}>
+                <td>{item.profileName}</td>
                 <td>
                   <Link to={`/prescriptions/${item.id}`}>{formatDateOnly(item.date, locale)}</Link>
                 </td>
                 <td>{formatDateOnly(item.expiryDate, locale)}</td>
                 <td className="text-end">
-                  <Link to={`/prescriptions/${item.id}/edit`} className="me-3">
-                    <i className="fa-regular fa-pen-to-square"></i>
-                  </Link>
-                  <Link to={`/prescriptions/${item.id}/delete`} className="link-danger">
-                    <i className="fa-solid fa-xmark"></i>
-                  </Link>
+                  {item.canEdit ? (
+                    <>
+                      <Link to={`/prescriptions/${item.id}/edit`} className="me-3">
+                        <i className="fa-regular fa-pen-to-square"></i>
+                      </Link>
+                      <Link to={`/prescriptions/${item.id}/delete`} className="link-danger">
+                        <i className="fa-solid fa-xmark"></i>
+                      </Link>
+                    </>
+                  ) : null}
                 </td>
               </tr>
             ))}
@@ -90,4 +96,3 @@ export default function PrescriptionsList() {
     </ProtectedRoute>
   )
 }
-
